@@ -1,0 +1,32 @@
+{% extends 'base.html' %}
+{% load static cache main_tags %}
+
+{% block css %}
+    <link rel="stylesheet" href="{% static 'css/fix_footer.css' %}" />
+{% endblock %}
+
+{% block advertisement %}
+    {% include '_advertisement.html' %}
+{% endblock %}
+
+{% block content %}
+
+<div class="row bg-white">
+    <!-- Posts list -->
+    <div class="post-content col-md-9 mt-4">
+        {% include 'posts/_posts_list.html' %}
+    </div>
+    
+    <!-- Latest Views -->
+    <div class="latest_posts col-md-3 mt-4">
+        <h4 class="text-center">{{ 'Останні огляди'|upper }}</h4>
+
+        {% cache 60 latest_posts %}
+            {% with post_list=latest_posts %}
+                {% include 'posts/_other_post_list.html' %}
+            {% endwith %}
+        {% endcache %}
+    </div>
+</div>
+
+{% endblock %}

@@ -1,0 +1,115 @@
+{% load static cache main_tags %}
+
+<header>
+    <nav class="navbar navbar-expand-md navbar-dark bg-dark fixed-top">
+        <a class="navbar-brand" href="{% url 'main:index' %}">
+            <i class="bi bi-controller"></i>
+            {{ site_main_title }}{% if user_agent.is_mobile %} (Mobile){% endif %}
+        </a>
+   
+        <button class="navbar-toggler" 
+            type="button" data-bs-toggle="collapse" 
+            data-bs-target="#navbarCollapse" 
+            aria-controls="navbarCollapse" 
+            aria-expanded="false" 
+            aria-label="Toggle navigation">
+            <span class="navbar-toggler-icon"></span>
+        </button>
+
+        <div class="collapse navbar-collapse" id="navbarCollapse">
+            <ul class="navbar-nav mr-auto">
+
+                {% cache 120 type %}
+                    {% for type in post_types %}
+                        <li class="nav-item">
+                            <a href="{% url 'posts:type' type.slug %}" 
+                                class="nav-link px-2 link-body-emphasis"
+                                style="color: {{ type.color }};">
+                                {{ type.name }}</a>
+                        </li>
+                    {% endfor %}
+                {% endcache %}
+
+                {% if not user.is_authenticated %}
+                    <li class="nav-item">
+                        <a href="{% url 'users:login' %}?next={{ request.path }}" class="nav-link px-2 link-body-emphasis">
+                            Увійти</a>
+                    </li>
+                    <li class="nav-item">
+                        <a href="{% url 'users:register' %}" class="nav-link px-2 link-body-emphasis">
+                            Реєстрація</a>
+                    </li>
+                {% else %}
+                    <li class="nav-item dropdown mega-menu-item">
+                        <a class="nav-link dropdown-toggle" href="" 
+                            id="navbarDarkDropdownMenuLink"
+                            role="button"
+                            data-bs-toggle="dropdown" 
+                            aria-expanded="false">
+                            Акаунт </a>
+                        </a>
+                        <ul class="dropdown-menu" aria-labelledby="navbarDarkDropdownMenuLink">
+                            <li>
+                                <a class="dropdown-item" 
+                                    href="{% url 'user:detail' user.username %}">
+                                    Профіль 
+                                    {% if user.first_name %}
+                                        ({{ user.first_name }}{% if user.last_name %} {{ user.last_name }}{% endif %})
+                                    {% elif user.last_name %}
+                                        ({{ user.last_name }})
+                                    {% else %}
+                                        ({{ user.username }})
+                                    {% endif %}
+                                </a>
+                            </li>
+                            <li><a href="{% url 'posts:saves' %}" 
+                                class="dropdown-item">
+                                Збережене</a></li>
+                            <li><a href="{% url 'users:profile' %}"
+                                class="dropdown-item">
+                                Налаштування</a></li>
+                            <hr class="dropdown-divider">
+                            <li><a href="{% url 'user:logout' %}?next={{ request.path }}"
+                                class="dropdown-item" >
+                                Вийти</a></li>
+                        </ul>
+                    </li>
+
+                    {% if user.is_staff %}
+                        <li class="nav-item">
+                            <a href="{% url 'admin:index' %}" 
+                                class="nav-link px-2 link-body-emphasis"
+                                title="Адмін панель">
+                                Адмін <i class="bi bi-kanban-fill"></i></a>
+                        </li>
+
+                        <li class="nav-item">
+                            <a href="{% url 'api:post_fake' 10 %}" 
+                                class="nav-link px-2 link-body-emphasis"
+                                title="Додати тестові публікації">
+                                Fake <i class="bi bi-facebook"></i></a>
+                        </li>
+        
+                        <li class="nav-item">
+                            <a href="/admin/posts/post/add/" 
+                                class="nav-link px-2 link-body-emphasis"
+                                title="Створити публікацію">
+                                Add <i class="bi bi-file-earmark-plus-fill"></i></a>
+                        </li>
+                    {% endif %}
+                {% endif %}
+            </ul>
+
+            <form class="form-inline mt-2 mt-md-0" role="search" action="{% url 'posts:search' %}" method="GET">
+                <input 
+                    value="{{ query|default:'' }}"
+                    name="q"
+                    class="form-control mr-sm-2" 
+                    type="text" 
+                    placeholder="Пошук..." 
+                    aria-label="Search">
+                <button class="btn btn-outline-success my-2 my-sm-0" type="submit">Знайти</button>
+            </form>
+        </div>
+    </nav>
+</header>

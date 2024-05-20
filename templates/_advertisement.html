@@ -1,0 +1,15 @@
+{% load static cache main_tags %}
+
+{% cache 60 advertisement %}
+    {% for advertisement in advertisements %}
+        <div class="advertisement" style="{{ advertisement.css_style|bleach_xss|safe }}"> 
+            {% if user.is_staff %}
+                <a href="/admin/main/announcement/">
+                    <h4>{{ advertisement.description|bleach_xss|safe }}</h4>
+                </a>
+            {% else %}
+                <h4>{{ advertisement.description|bleach_xss|safe }}</h4>
+            {% endif %}
+        </div>
+    {% endfor %}
+{% endcache %}

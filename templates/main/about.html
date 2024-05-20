@@ -1,0 +1,29 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block advertisement %}
+    {% include '_advertisement.html' %}
+{% endblock %}
+
+{% block content %}
+
+<div class=" bg-white p-4 mb-4 mx-2 rounded custom-shadow">
+    <h2>{{ title }}</h2>
+    <p>{{ description }}</p>
+
+    <input hx-get="/api/search-posts" 
+        hx-trigger="keyup changed delay:300ms" 
+        hx-target=".posts-list" 
+        name="q"
+        class="form-control mr-sm-2" 
+        type="text" 
+        placeholder="Пошук..." 
+        aria-label="Search">
+
+    <div class="posts-list p-3 mt-3 bg-dark">
+        <h2 class="text-white">Пошукові дані</h2>
+    </div>
+
+</div>
+    
+{% endblock %}

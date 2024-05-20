@@ -1,0 +1,78 @@
+{% load static main_tags %}
+
+{% if post.is_publicated %}
+    <div id="post-block" class="row bg-white border-bottom">
+        <div class="col pl-4 pr-4 d-flex flex-column position-static">
+            <p class="d-inline-block mt-3">
+                {% if post.type.slug %}
+                    <a href="{% url 'posts:type' post.type.slug %}"
+                        class="font-weight-bold"
+                        style="color: {{ post.type.color }}">
+                        {{ post.type.name }}
+                    </a>
+                {% endif %}
+                
+                <a href="{{ post.get_absolute_url }}#comments" 
+                    class="text-dark float-right">
+                    <i class="bi bi-chat-right-text"></i> {{ post.comment_count }}
+                </a>
+            </p>
+
+            <p class="d-inline-block mb-2">
+                Автор: 
+                <b>{% if post.user %}
+                    <a href="{% url 'user:detail' post.user.username %}" title="{{ post.user.username }}">
+                        {{ post.user.get_full_name|default:post.user.username }}</a>
+                {% else %}
+                    [невідомо]
+                {% endif %}</b> <i class="text-secondary">{{ post.created_date }}</i>
+
+                {% if user.is_staff %}
+                    <a href="{% url 'posts:delete' post.slug %}" 
+                        class="btn btn-danger float-right">
+                        <i class="bi bi-trash"></i>
+                    </a>
+                    <!-- onclick="return confirm('Ви впевнені, що хочете видалити цю публікацію?');" -->
+                    <a href="{% url 'admin:posts_post_change' post.id %}" 
+                        class="btn btn-dark float-right">
+                        <i class="bi bi-pencil-square"></i>
+                    </a>
+                {% endif %} 
+            </p>
+            
+            <a href="{% url 'posts:detail' post.slug %}" class="text-dark">
+                <h3 class="mb-0">
+                    {% autoescape off %}
+                        {% if post.headline %}
+                            {{ post.headline|truncatechars:55 }}
+                        {% else %}
+                            {{ post.title|truncatechars:55 }}
+                        {% endif %}
+                    {% endautoescape %}
+                </h3>
+            </a>
+
+            <p class="card-text mb-auto">
+                {% autoescape off %} 
+                    {% if post.bodyline %}
+                        {{ post.bodyline|truncatechars:170 }}
+                    {% else %}
+                        {{ post.content|truncatechars:100|clear_tags|bleach_linkify }}
+                    {% endif %}
+                {% endautoescape %}
+            </p>
+        </div>
+        
+        <div class="post-image col-auto pr-0 p-2">
+            <a href="{{ post.get_absolute_url }}">
+                {% if post.image %}
+                    <img class="bd-placeholder-img" src="{{ post.image.url }}" 
+                        width="240" height="240">
+                {% else %}
+                    <img class="bd-placeholder-img" src="{% static 'images/not_found_image.png' %}" 
+                        width="240" height="240">
+                {% endif %}
+            </a>
+        </div>
+    </div>
+{% endif %}

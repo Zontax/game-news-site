@@ -1,0 +1,56 @@
+{% load static cache %}
+
+<!DOCTYPE html>
+<html lang="uk">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link rel="icon" type="image/png" href="{% static 'favicon.ico' %}">
+    <link rel="stylesheet" href="{% static 'css/bootstrap/bootstrap.min.css' %}" />
+    <link rel="stylesheet" href="{% static 'css/bootstrap-icons.css' %}">
+    <link rel="stylesheet" href="{% static 'css/base.css' %}" />
+    <link rel="stylesheet" href="{% static 'css/ck-content.css' %}" />
+    <script async charset="utf-8" src="{% static 'js/ck/embed-platform.js' %}"></script>
+
+    {% block css %}
+    {% endblock %}
+
+    {% block title %}
+        <title>
+            {% if title %}
+                {{ title }} - {{ site_main_title }}
+            {% else %}
+                {{ site_main_title }}
+            {% endif %}
+        </title>
+    {% endblock %}
+</head>
+
+<body>
+    {% include '_header.html' %}
+    
+    {% block advertisement %}
+    {% endblock %}
+    
+    {% include '_notifications.html' %}
+
+    <main class="main">
+        <div class="container">
+            {% block content %}
+            {% endblock %}
+        </div>
+    </main>
+
+    {% include '_footer.html' %}
+
+    <script src="{% static 'js/bootstrap.min.js' %}"></script>
+    <script src="{% static 'js/bootstrap.bundle.min.js' %}"></script>
+    <script src="{% static 'js/jquery.min.js' %}"></script>
+    <script src="{% static 'js/jquery.validate.min.js' %}"></script>
+    <script src="{% static 'js/ck/embedly-card.js' %}"></script>
+    <script src="{% static 'js/htmx.min.js' %}"></script>
+    <script src="{% static 'js/base.js' %}"></script>
+</body>
+
+</html>

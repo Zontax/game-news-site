@@ -1,0 +1,47 @@
+/* * {
+    outline: 1px solid rgb(219, 219, 219) !important;
+} */
+
+body {
+    /* background-image: url('../images/bg-image.jpg'); */
+    background-color: rgb(185, 185, 185);
+    background-repeat: no-repeat;
+    background-attachment: fixed;
+    background-position: center;
+    background-size: cover;
+    height: 100%;
+}
+
+div.advertisement {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    max-width: 101.1%;
+    top: 56px;
+    padding-top: 5px;
+    background-color: rgb(222, 208, 19);
+}
+
+header {
+    margin-bottom: 0 !important;
+}
+
+footer {
+    background-color: aliceblue;
+}
+
+/* main div.container {
+    margin-top: 56px;
+} */
+
+.post-content {
+    margin-top: 56px;
+}
+
+.captcha {
+    background-color: #f2f2f2;
+    border: 1px solid #ccc;
+    border-radius: 5px;
+    padding: 10px;
+    margin-bottom: 10px;
+}

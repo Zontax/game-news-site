@@ -1,0 +1,19 @@
+{% load static cache humanize main_tags %}
+
+{% for post in post_list %}
+    <div class="row bg-light mt-1">
+        <div class="col p-4 mb-1 d-flex flex-column position-static">
+            <a href="{{ post.get_absolute_url }}">
+                {{ post.title|truncatechars:55 }}
+            </a>
+            <p>
+                <a href="{{ post.get_absolute_url }}#comments" class="text-dark">
+                    <i class="bi bi-chat-right-text"></i> {{ post.comment_count }}
+                </a>
+                <i class="mb-1 text-secondary float-right">
+                    {{ post.created_date|naturalday:'j F, Y' }}
+                </i>
+            </p>
+        </div>
+    </div>
+{% endfor %}

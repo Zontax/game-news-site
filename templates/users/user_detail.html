@@ -1,0 +1,83 @@
+{% extends 'base.html' %}
+{% load static humanize main_tags %}
+
+{% block css %}
+    <link rel="stylesheet" href="{% static 'css/fix_footer.css' %}" />
+{% endblock %}
+
+{% block content %}
+
+<div class="container">
+    <div class="row mt-5">
+
+        <div class="col-lg-2">
+        </div>
+
+        <div class="col-lg-12">
+
+            <div class="container mt-5">
+                <div class="card mb-4 custom-shadow">
+                    <div class="row">
+                        <div class="col-md-4">
+                            <img src="{% if detail_user.avatar %}{{ detail_user.avatar.url }}{% else %}
+                            
+                            {% static 'images/baseavatar.jpg' %}{% endif %}"
+                                class="img-thumbnail rounded-0"
+                                alt="Avatar image" 
+                                style="max-width: 250px;"
+                                data-bs-toggle="modal"
+                                data-bs-target="#imageModal1">
+
+                            {% if user.is_superuser %}
+                                <a href="/admin/users/user/{{ detail_user.id }}/change/" 
+                                    class="btn btn-dark">
+                                    Адмінка
+                                </a>
+                            {% endif %}
+                        </div>
+                        <div class="col-md-8">
+                            <div class="card-body">
+                                <h5 class="card-title">
+                                    <text class="text-uppercase"
+                                        title="{{ detail_user.username }}">
+                                        {{ detail_user.first_name }} {{ detail_user.last_name }}
+                                    </text> -> <text class="text-muted">{{ detail_user.username }}</text>
+                                    
+                                    {% if detail_user.is_authenticated  %}
+                                        <text title="В мережі"> 🟢</text>
+                                    {% endif %}
+                                </h5>
+
+                                <div class="ck-content">
+                                    {% if detail_user.description %}
+                                        {{ detail_user.description|bleach_xss|safe }}
+                                    {% endif %}
+                                </div>
+
+                                <p>Дата реєстрації: {{ detail_user.date_joined|naturalday }}</p>
+                                
+                                <a href="{% url 'user:detail' detail_user.username %}" class="btn btn-dark">
+                                    Лайк
+                                </a>
+                                {% if user.id == detail_user.id %}
+                                    <a href="{% url 'user:profile' %}" class="btn btn-dark float-right">
+                                        <i class="bi bi-pencil-square"></i>
+                                    </a>
+                                {% endif %}
+
+                                Кількість публікацій: {{ detail_user.posts.count }}
+                            </div>
+                        </div>
+                    </div>
+                    <br>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+{% with modal_image=detail_user.avatar modal_title=detail_user.username %}
+    {% include '_modal_image_preview.html' %}
+{% endwith %}
+
+{% endblock %}

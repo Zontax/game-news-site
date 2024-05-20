@@ -1,0 +1,77 @@
+{% load main_tags humanize %}
+
+{% for comment in comments.all %}
+    <div id="comment-{{ comment.pk }}" class="row bg-white mt-1">
+        <div class="col p-4 mb-1 d-flex flex-column position-static">
+            <div class="d-inline-block text-primary-emphasis">
+                <p>
+                    <a href="{% url 'user:detail' comment.user.username %}" 
+                        title="{{ comment.user.username }}">
+                        {{ comment.user.first_name }}{% if comment.is_edited %} (edited){% endif %} 
+                    </a>
+                    <i class="mb-1 text-body-secondary float-right">
+                        {{ comment.created_date|naturalday }}
+                    </i>
+                </p>
+            </div>
+
+            <p class="card-text mb-auto">
+                <div class="ck-content bg-light p-1">
+                    {{ comment.text|bleach_xss|safe }}
+                </div>
+            </p>
+            
+            <p class="card-text mb-auto">
+                <i class="btn btn-dark ml-1 float-right" 
+                    hx-get="/api/get-reply-comments/{{ comment.id }}" 
+                    hx-trigger="click"
+                    hx-target="#ansver-to-{{ comment.id }}">
+                    Відповісти
+                </i>
+
+                {% if comment.replies_count > 0 %}
+                    <a href="javascript:void(0);" 
+                        data-hx-get="/api/get-reply-comments/{{ comment.id }}" 
+                        data-hx-trigger="click"
+                        data-hx-target="#reply-comment-{{ comment.id }}"
+                        onclick="toggleComments(this, '{{ comment.id }}')">
+                        Відповіді <i class="bi bi-chat-right-text"> </i> 
+                        {{ comment.replies_count }}
+                    </a>
+                {% endif %}
+
+                {% if user.is_staff %}
+                    <a href="{% url 'admin:posts_postcomment_delete' comment.id %}" 
+                        class="btn btn-danger float-right"
+                        onclick="return confirm('Ви впевнені, що хочете видалити цю публікацію?');">
+                        <i class="bi bi-trash"></i>
+                    </a>
+                    <a href="{% url 'admin:posts_postcomment_change' comment.id %}" 
+                        class="btn btn-dark float-right">
+                        <i class="bi bi-pencil-square"></i>
+                    </a>
+                {% endif %}
+            </p>
+        </div>
+    </div>
+
+    <div id="reply-comment-{{ comment.id }}" 
+        class="col p-4 ml-5 d-flex flex-column">
+    </div>
+{% endfor %}
+
+<!-- <div class="" id="reply-comment-{{ comment.id }}" >
+    <form class="mb-3" method="post" action="">
+        {% csrf_token %}
+        <input id="comment_id" name="comment_id" value="{{ comment.id }}" required hidden>
+        <div class="form-group pt-3">
+            <textarea class="form-control" 
+                id="comment_text" 
+                name="comment_text" 
+                rows="2" 
+                placeholder="Відповісти..."
+                required></textarea>
+        </div>
+        <button type="submit" class="btn btn-primary">Відповісти</button>
+    </form>
+</div> -->
