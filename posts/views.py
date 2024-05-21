@@ -1,23 +1,16 @@
-from django.db.models import Count, Prefetch, QuerySet
-from django.http import HttpRequest, HttpResponse, HttpResponseForbidden, HttpResponseNotFound
+from django.db.models import Count, Prefetch
+from django.http import Http404, HttpRequest, HttpResponseForbidden
 from django.shortcuts import get_object_or_404, redirect, render
-from django.urls import reverse
-from django.utils.decorators import method_decorator
-from django.contrib.auth.decorators import login_required
+from django.urls import reverse, reverse_lazy
+from django.contrib.auth.mixins import LoginRequiredMixin
 from django.contrib import messages
 from django.core.paginator import Paginator
 from django.views.generic import View, ListView, DetailView, DeleteView
-from django.contrib.syndication.views import Feed
-from django.template.defaultfilters import truncatewords
-from rest_framework.views import APIView
-from rest_framework.response import Response
-
 
 from posts.models import Post, PostType, PostTopic, PostComment
 from posts.services import q_search
-from app.settings import POSTS_IN_PAGE, BASE_DIR
+from app.settings import POSTS_IN_PAGE
 import logging
-import os
 
 logger = logging.getLogger(__name__)
 
@@ -27,33 +20,32 @@ class PostListView(View):
     def get(self, request: HttpRequest, type_slug=None, tag_slug=None, topic_slug=None):
         page = request.GET.get('page', 1)
         query = request.GET.get('q', '')
-        topic = request.GET.get('topic', None)
+        topic_param = request.GET.get('topic', None)
         type = None
+        topic = None
 
         if tag_slug:
-            posts = Post.objects.filter(
-                tags__slug=tag_slug, is_publicated=True)
+            posts = Post.published.filter(tags__slug=tag_slug)
         elif topic_slug:
-            posts = Post.objects.filter(
-                topics__slug=topic_slug, is_publicated=True)
+            posts = Post.published.filter(topics__slug=topic_slug)
+            topic = PostTopic.objects.get(slug=topic_slug)
         elif (type_slug == None and query == ''):
-            posts = Post.objects.filter(is_publicated=True)
+            posts = Post.published.all()
         elif query:
-            posts = q_search(query).filter(is_publicated=True)
+            posts = q_search(query)
         else:
             type = get_object_or_404(PostType, slug=type_slug)
-            if topic:
-                posts = Post.objects.filter(type=type,
-                                            topics__slug=topic,
-                                            is_publicated=True)
+            if topic_param:
+                posts = Post.published.filter(type=type,
+                                              topics__slug=topic_param)
+                topic = PostTopic.objects.get(slug=topic_param)
             else:
-                posts = Post.objects.filter(type=type,
-                                            is_publicated=True)
+                posts = Post.published.filter(type=type)
 
         posts = (posts.order_by('-created_date')
                  .select_related('type', 'user')
-                 .annotate(
-            comment_count=Count('comments')))
+                 .annotate(comment_count=Count('comments')))
+
         topics = PostTopic.objects.filter(is_general=True)
 
         paginator = Paginator(posts, POSTS_IN_PAGE)
@@ -66,6 +58,7 @@ class PostListView(View):
             'posts': posts_in_page,
             'topics': topics,
             'slug_url': type_slug,
+            'topic': topic,
             'query': query,
         }
         return render(request, 'posts/index.html', context)
@@ -76,15 +69,14 @@ class PostDetailView(DetailView):
     template_name = 'posts/detail.html'
     slug_url_kwarg = 'post_slug'
     context_object_name = 'post'
-    queryset: QuerySet = (Post.objects
-                          .filter(is_publicated=True)
-                          .annotate(comment_count=Count('comments'))
-                          .prefetch_related(
-                              Prefetch('comments', PostComment.objects
-                                       .select_related('user')
-                                       .filter(parent__isnull=True)
-                                       .annotate(replies_count=Count('childrens')))
-                          ))
+    queryset = (Post.published
+                .annotate(comment_count=Count('comments'))
+                .prefetch_related(
+                    Prefetch('comments', PostComment.objects
+                             .select_related('user')
+                             .filter(parent__isnull=True)
+                             .annotate(replies_count=Count('childrens')))
+                ))
 
     def get(self, request, *args, **kwargs):
         return super().get(request, *args, **kwargs)
@@ -106,31 +98,29 @@ class PostDetailView(DetailView):
         return redirect(post)
 
     def get_context_data(self, **kwargs):
-        latest_posts = (
-            Post.objects
-            .filter(type=self.object.type, is_publicated=True)[:5]
-            .select_related('type', 'user')
-            .annotate(comment_count=Count('comments'))
-        )
+        latest_posts = (Post.published
+                        .filter(type=self.object.type)[:5]
+                        .select_related('type', 'user')
+                        .annotate(comment_count=Count('comments'))
+                        )
         context = super().get_context_data(**kwargs)
         context['title'] = self.object.title
         context['latest_posts'] = latest_posts
         return context
 
 
-@method_decorator(login_required, name='dispatch')
-class SavedPostListView(View):
+class SavedPostListView(LoginRequiredMixin, View):
 
     def get(self, request: HttpRequest):
         page = request.GET.get('page', 1)
         user_id = request.user.id
 
-        posts: QuerySet[Post] = (Post.objects
-                                 .filter(is_publicated=True, saves__id=user_id)
-                                 .select_related('type', 'user')
-                                 .annotate(comment_count=Count('comments'))
-                                 .order_by('-created_date')
-                                 )
+        posts = (Post.published
+                 .filter(saves=user_id)
+                 .select_related('type', 'user')
+                 .annotate(comment_count=Count('comments'))
+                 .order_by('-created_date')
+                 )
         paginator = Paginator(posts, POSTS_IN_PAGE)
         posts_in_page = paginator.page(int(page))
 
@@ -145,8 +135,7 @@ class RandomPostsView(View):
 
     def get(self, request: HttpRequest):
         posts = (
-            Post.objects
-            .filter(is_publicated=True)
+            Post.published
             .order_by('?')
             .select_related('type', 'user')
             .annotate(comment_count=Count('comments'))
@@ -158,7 +147,6 @@ class RandomPostsView(View):
         return render(request, 'main/index.html', context)
 
 
-@method_decorator(login_required, name='dispatch')
 class DeletePostsView(View):
 
     def get(self, request: HttpRequest, post_slug):
@@ -169,12 +157,11 @@ class DeletePostsView(View):
             post = Post.objects.get(slug=post_slug)
 
         except Post.DoesNotExist:
-            return HttpResponseNotFound('Публікацію не знайдено. Схоже, що вона вже видалена.')
+            return Http404('Публікацію не знайдено. Схоже, що вона вже видалена.')
 
         post.delete()
         messages.success(request, f'Публікацію ({post_slug}) видалено')
 
-        # reverse('posts:type', args=['news'])
         return redirect(reverse('main:index'))
 
 # import os

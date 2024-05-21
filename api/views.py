@@ -1,11 +1,10 @@
-from django.db.models import Count, Prefetch, QuerySet
+from django.db.models import Count
 from django.http import HttpRequest, HttpResponse, JsonResponse
 from django.shortcuts import get_object_or_404
 from django.template.response import TemplateResponse
 from django.utils import timezone
-from django.core.paginator import Paginator, EmptyPage, PageNotAnInteger
 from django.utils.decorators import method_decorator
-from django.contrib.auth.decorators import login_required, user_passes_test
+from django.contrib.auth.decorators import user_passes_test
 from rest_framework.permissions import IsAuthenticated
 from rest_framework.response import Response
 from rest_framework.views import APIView
@@ -18,14 +17,13 @@ from posts.services import q_search
 
 from mimesis import Person, Text, Datetime
 from mimesis.builtins import UkraineSpecProvider
-import logging
-import random
-import uuid
 from datetime import datetime, timedelta, UTC
 from random import randint
 from pytils.translit import slugify
-from PIL import Image, ImageDraw
 from app.settings import BASE_DIR
+import logging
+import random
+import uuid
 
 person = Person('uk')
 text = Text('uk')
@@ -179,7 +177,7 @@ class PostListAPIView(APIView):
     """
 
     def get(self, request):
-        posts = Post.objects.filter(is_publicated=True)
+        posts = Post.published.all()
         serializer = PostListSerializer(posts, many=True)
 
         return Response(serializer.data)

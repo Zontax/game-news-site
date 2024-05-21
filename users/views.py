@@ -1,4 +1,5 @@
 from django.http import HttpRequest
+from django.contrib.auth.mixins import LoginRequiredMixin
 from django.contrib.auth.decorators import login_required
 from django.contrib.auth.views import LoginView
 from django.contrib import auth, messages
@@ -12,6 +13,7 @@ from django.views import View
 
 from app.settings import EMAIL_HOST_USER, APP_NAME, MEDIA_ROOT
 from main.services import create_random_image
+from posts.models import Post
 from users.models import User
 from users.forms import UserLoginForm, UserRegisterForm, UserProfileForm, ResetTokenForm, ResetPasswordForm, SetNewPasswordForm
 from users.services import generate_token
@@ -75,7 +77,7 @@ class UserLoginView(LoginView):
 
 
 @method_decorator(login_required, name='dispatch')
-class UserProfileView(View):
+class UserProfileView(LoginRequiredMixin, View):
     template_name = 'users/profile.html'
 
     def get(self, request: HttpRequest):
@@ -232,5 +234,6 @@ class UserDetailView(DetailView):
         context = {
             'title': user.description,
             'detail_user': user,
+            'posts_count': Post.published.filter(user=user).count(),
         }
         return render(request, 'users/user_detail.html', context)

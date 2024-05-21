@@ -41,8 +41,10 @@
                                     <text class="text-uppercase"
                                         title="{{ detail_user.username }}">
                                         {{ detail_user.first_name }} {{ detail_user.last_name }}
-                                    </text> -> <text class="text-muted">{{ detail_user.username }}</text>
-                                    
+                                    </text> 
+                                    <i class="bi bi-arrow-right-short"></i> 
+                                    <text class="text-muted">{{ detail_user.username }}</text>
+
                                     {% if detail_user.is_authenticated  %}
                                         <text title="В мережі"> 🟢</text>
                                     {% endif %}
@@ -65,7 +67,9 @@
                                     </a>
                                 {% endif %}
 
-                                Кількість публікацій: {{ detail_user.posts.count }}
+                                <p class="mt-3">Кількість публікацій: 
+                                    <text class="text-muted">{{ posts_count }}</text>
+                                </p>
                             </div>
                         </div>
                     </div>

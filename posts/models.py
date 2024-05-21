@@ -1,15 +1,14 @@
-from django.db.models import Model, Index, PositiveSmallIntegerField, CharField, SlugField, BooleanField, TextField, ImageField, DateTimeField, ForeignKey, ManyToManyField
+from django.db.models import Model, Manager, Index, PositiveSmallIntegerField, CharField, SlugField, BooleanField, TextField, ImageField, DateTimeField, ForeignKey, ManyToManyField
 from django.db.models.signals import post_migrate, pre_delete
 from django.db.models import SET_NULL, CASCADE
 from django.dispatch import receiver
 from django.urls import reverse
 
+from users.models import User
 from colorfield.fields import ColorField
 from django_ckeditor_5.fields import CKEditor5Field
-from users.models import User
 from django.utils.timezone import now
 from app.settings import MEDIA_ROOT
-from enum import Enum
 import os
 
 
@@ -55,6 +54,9 @@ class PostTopic(Model):
 
     def __str__(self):
         return self.name
+    
+    def get_absolute_url(self):
+        return reverse('posts:topic', args=[self.slug])
 
 
 class PostTag(Model):
@@ -76,6 +78,14 @@ class PostTag(Model):
         return self.name
 
 
+class PostPublishedManager(Manager):
+    """Усі опубліковані публікації"""
+
+    def get_queryset(self):
+        return super().get_queryset()\
+            .filter(is_publicated=True)
+
+
 class Post(Model):
     """
     Базова модель публікації копистувачів.
@@ -84,9 +94,9 @@ class Post(Model):
         (False, 'Чернетка'),
         (True, 'Опубліковано'),
     ]
-    user = ForeignKey(User, SET_NULL, related_name='posts', null=True, 
+    user = ForeignKey(User, SET_NULL, related_name='posts', null=True,
                       blank=True, verbose_name='Автор')
-    type = ForeignKey(PostType, SET_NULL, related_name='posts', 
+    type = ForeignKey(PostType, SET_NULL, related_name='posts',
                       null=True, verbose_name='Тип')
     title = CharField('Назва', max_length=130, unique=True)
     slug = SlugField('Slug', max_length=150, unique=True)
@@ -101,7 +111,7 @@ class Post(Model):
                              blank=True, verbose_name='Рубрики')
     tags = ManyToManyField(PostTag, related_name='posts',
                            blank=True, verbose_name='Теги')
-    is_publicated = BooleanField('Опубліковано', choices=PUBLISH_STATUS, 
+    is_publicated = BooleanField('Опубліковано', choices=PUBLISH_STATUS,
                                  default=True)
     is_edited = BooleanField('Змінено', default=False)
     created_date = DateTimeField('Дата', auto_now_add=True)
@@ -120,6 +130,9 @@ class Post(Model):
     ReviewRating = PositiveSmallIntegerField('Рейтинг',
                                              blank=True, null=True)
 
+    objects = Manager()
+    published = PostPublishedManager()
+
     class Meta():
         db_table = 'posts'
         verbose_name = 'Публікація'
@@ -131,7 +144,7 @@ class Post(Model):
         return self.title[0:30]
 
     def get_absolute_url(self):
-        return reverse('posts:detail', kwargs={'post_slug': self.slug})
+        return reverse('posts:detail', args=[self.slug])
 
     def total_likes(self):
         return self.likes.count()
@@ -147,7 +160,7 @@ class PostComment(Model):
                       verbose_name='Автор')
     parent = ForeignKey('self', SET_NULL, related_name='childrens',
                         blank=True, null=True, verbose_name="Відповідь на")
-    text = TextField('Текст', max_length=1000)
+    text = CKEditor5Field('Текст', config_name='extends', max_length=1000)
     is_edited = BooleanField('Змінено', default=False)
     created_date = DateTimeField('Дата', auto_now_add=True)
     edit_date = DateTimeField('Дата редагування', auto_now=True,
@@ -161,10 +174,10 @@ class PostComment(Model):
         indexes = [Index(fields=['-created_date'])]
 
     def __str__(self):
-        return f'({self.user}) {self.text[0:22]}'
+        return f'({self.user.username}) {self.text[0:22]}'
 
     def get_absolute_url(self):
-        return f"{reverse('posts:detail', kwargs={'post_slug': self.post.slug})}#comment-{self.id}"
+        return f"{reverse('posts:detail', args=[self.post.slug])}#comment-{self.id}"
 
 
 @receiver(pre_delete, sender=Post)

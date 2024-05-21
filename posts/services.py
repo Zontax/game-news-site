@@ -27,7 +27,7 @@ def q_search(query):
         query = SearchQuery(query)
 
         result = (
-            Post.objects
+            Post.published
                 .annotate(rank=SearchRank(vector, query))
                 .filter(rank__gt=0)
                 .order_by('-rank')

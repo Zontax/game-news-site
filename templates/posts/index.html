@@ -8,8 +8,8 @@
 {% block content %}
 
 <div class="row bg-white">
+    <!-- Search results -->
     <div class="post-content col-md-9 mt-1">
-        <!-- Search results -->
         {% if request.GET.q %}
             <div class=" bg-white p-4 mb-4 mx-2 mt-5 rounded custom-shadow">
                 {% if posts %}
@@ -24,23 +24,34 @@
         {% endif %}
     </div>
 
-    <!-- Posts list -->
+    
     <div class="post-content col-md-9 mt-2">
+        <!-- Type & Topic -->
+        {% if type %}
+            <h2 class="mt-2 text-center">{{ type.name }}
+                {% if topic %}: <a href="{{ topic.get_absolute_url }}">{{ topic.name }}</a>
+                {% endif %}
+            </h2>
+        <!-- Topic -->
+        {% elif topic %}
+            <h2 class="mt-2 text-center">{{ topic.name }}</h2>    
+        {% endif %}
+        <!-- Posts list -->
         {% include 'posts/_posts_list.html' %}
     </div>
-
+    
     <!-- Topics -->
     {% if not request.GET.q %}
         <div class="latest_posts col-md-3 mt-4 text-center">
-            <h4>Рубрики</h4>
-            {% for topic in topics %}
-                {% if type %}
+            {% if type %}
+                <h4>Рубрики</h4>
+                {% for topic in topics %}
                     <a href="{% url 'posts:type' slug_url %}?topic={{ topic.slug }}" 
                         class="topic-button btn btn-dark d-block mb-2">
                         {{ topic.name }}
                     </a>
-                {% endif %}
-            {% endfor %}
+                {% endfor %}
+            {% endif %}
         </div>
     {% endif %}
 </div>

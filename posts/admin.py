@@ -20,26 +20,25 @@ class PostTagAdmin(admin.ModelAdmin):
 @admin.register(PostTopic)
 class PostTopicAdmin(admin.ModelAdmin):
     prepopulated_fields = {'slug': ('name',)}
-    list_display = ['name', 'slug', 'description']
+    list_display = ['name', 'is_general', 'slug', 'description']
+    list_display_links = ['name']
+    list_editable = ['is_general']
 
-
-# class PostForm(ModelForm):
-#     content = CharField(widget=CKEditorWidget())
-
-#     class Meta:
-#         model = Post
-#         fields = '__all__'
 
 @admin.register(Post)
 class PostAdmin(admin.ModelAdmin):
     prepopulated_fields = {'slug': ('title',)}
-    list_display = ['title', 'display_image', 'type', 'is_publicated']
-    list_editable = ['type', 'is_publicated']
-    search_fields = ['title', 'content', 'slug', 'meta_description']
-    list_filter = ['type', 'is_publicated', 'is_edited']
-    filter_horizontal = ('topics', 'tags')
-    # form = PostForm
+    list_display = ['id', 'title', 'display_image', 'type', 'created_date']
     list_display_links = ['title']
+    list_editable = ['type']
+    list_filter = ['created_date', 'type']
+    list_per_page = 20
+    search_fields = ['title', 'content', 'meta_description']
+    filter_horizontal = ('topics', 'tags')
+    ordering = ['-created_date']
+    date_hierarchy = 'created_date'
+    raw_id_fields = ['user']
+    
     fields = [
         ('user', 'type'),
         ('title', 'slug'),
@@ -66,6 +65,10 @@ class PostAdmin(admin.ModelAdmin):
 
 @admin.register(PostComment)
 class PostCommentAdmin(admin.ModelAdmin):
-    list_display = ['text', 'post', 'is_edited', 'created_date']
-    list_filter = ['post', 'parent']
+    list_display = ['id', 'text', 'user', 'is_edited', 'created_date']
+    list_display_links = ['text']
+    list_filter = ['created_date']
+    list_per_page = 20
     search_fields = ['text']
+    date_hierarchy = 'created_date'
+    raw_id_fields = ['user', 'post', 'parent']
