@@ -99,7 +99,7 @@ class Post(Model):
     type = ForeignKey(PostType, SET_NULL, related_name='posts',
                       null=True, verbose_name='Тип')
     title = CharField('Назва', max_length=130, unique=True)
-    slug = SlugField('Slug', max_length=150, unique=True)
+    slug = SlugField('Slug', max_length=150, unique=True, unique_for_date='created_date')
     summary = CharField('Короткий опис', max_length=200, default='')
     content = CKEditor5Field('Текст', config_name='extends', max_length=50000)
     meta_description = CharField('SEO Інформація', max_length=400,

@@ -52,7 +52,7 @@
 
                                 <div class="ck-content">
                                     {% if detail_user.description %}
-                                        {{ detail_user.description|bleach_xss|safe }}
+                                        {{ detail_user.description|linebreaks }}
                                     {% endif %}
                                 </div>
 

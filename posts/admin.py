@@ -38,7 +38,7 @@ class PostAdmin(admin.ModelAdmin):
     ordering = ['-created_date']
     date_hierarchy = 'created_date'
     raw_id_fields = ['user']
-    
+
     fields = [
         ('user', 'type'),
         ('title', 'slug'),
@@ -59,8 +59,6 @@ class PostAdmin(admin.ModelAdmin):
                     <img src="{obj.image.url}" width="50" height="50" />
                 </a>''')
         return None
-
-    display_image.short_description = 'Icon'
 
 
 @admin.register(PostComment)

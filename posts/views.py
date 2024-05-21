@@ -4,7 +4,7 @@ from django.shortcuts import get_object_or_404, redirect, render
 from django.urls import reverse, reverse_lazy
 from django.contrib.auth.mixins import LoginRequiredMixin
 from django.contrib import messages
-from django.core.paginator import Paginator
+from django.core.paginator import Paginator, EmptyPage, PageNotAnInteger
 from django.views.generic import View, ListView, DetailView, DeleteView
 
 from posts.models import Post, PostType, PostTopic, PostComment
@@ -47,15 +47,19 @@ class PostListView(View):
                  .annotate(comment_count=Count('comments')))
 
         topics = PostTopic.objects.filter(is_general=True)
-
         paginator = Paginator(posts, POSTS_IN_PAGE)
 
-        posts_in_page = paginator.page(int(page))
+        try:
+            posts = paginator.page(page)
+        except PageNotAnInteger:
+            posts = paginator.page(1)
+        except EmptyPage:
+            posts = paginator.page(paginator.num_pages)
 
         context = {
             'title': 'Каталог',
             'type': type,
-            'posts': posts_in_page,
+            'posts': posts,
             'topics': topics,
             'slug_url': type_slug,
             'topic': topic,
