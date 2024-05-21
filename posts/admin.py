@@ -1,5 +1,6 @@
 from django.utils.html import format_html
 from django.contrib import admin
+from django.forms import Textarea
 
 from posts.models import PostType, PostTag, PostTopic, Post, PostComment
 
@@ -7,7 +8,8 @@ from posts.models import PostType, PostTag, PostTopic, Post, PostComment
 @admin.register(PostType)
 class PostTypeAdmin(admin.ModelAdmin):
     prepopulated_fields = {'slug': ('name',)}
-    list_display = ['name', 'color', 'name_plural', 'slug']
+    list_display = ['id', 'name', 'color', 'name_plural', 'slug']
+    list_display_links = ['name']
     list_editable = ['slug', 'color']
 
 
@@ -47,7 +49,8 @@ class PostAdmin(admin.ModelAdmin):
         ('image', 'detail_image'),
         'topics',
         'tags',
-        'is_publicated',
+        ('is_publicated', 'review_rating'),
+        ('review_pluses', 'review_minuses'), 
     ]
 
     def display_image(self, obj: Post):
@@ -59,6 +62,13 @@ class PostAdmin(admin.ModelAdmin):
                     <img src="{obj.image.url}" width="50" height="50" />
                 </a>''')
         return None
+
+    def formfield_for_dbfield(self, db_field, **kwargs):
+        field = super(PostAdmin, self).formfield_for_dbfield(
+            db_field, **kwargs)
+        if db_field.name in ['review_pluses', 'review_minuses']:
+            field.widget = Textarea(attrs=field.widget.attrs)
+        return field
 
 
 @admin.register(PostComment)

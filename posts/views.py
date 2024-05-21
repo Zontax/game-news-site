@@ -42,8 +42,7 @@ class PostListView(View):
             else:
                 posts = Post.published.filter(type=type)
 
-        posts = (posts.order_by('-created_date')
-                 .select_related('type', 'user')
+        posts = (posts.select_related('type', 'user')
                  .annotate(comment_count=Count('comments')))
 
         topics = PostTopic.objects.filter(is_general=True)
@@ -123,7 +122,6 @@ class SavedPostListView(LoginRequiredMixin, View):
                  .filter(saves=user_id)
                  .select_related('type', 'user')
                  .annotate(comment_count=Count('comments'))
-                 .order_by('-created_date')
                  )
         paginator = Paginator(posts, POSTS_IN_PAGE)
         posts_in_page = paginator.page(int(page))

@@ -62,6 +62,14 @@
                 {% endautoescape %}
             </p>
         </div>
+
+        {% if post.review_rating and post.type.pk == 2 %}
+            <div class="card-review-rating col-auto pr-0 p-2">
+                <a href="{% url 'posts:detail' post.slug %}">
+                    {{ post.review_rating }}
+                </a>
+            </div>
+        {% endif %}
         
         <div class="post-image col-auto pr-0 p-2">
             <a href="{{ post.get_absolute_url }}">

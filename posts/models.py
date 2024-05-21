@@ -82,8 +82,9 @@ class PostPublishedManager(Manager):
     """Усі опубліковані публікації"""
 
     def get_queryset(self):
-        return super().get_queryset()\
-            .filter(is_publicated=True)
+        return (super().get_queryset()
+                .filter(is_publicated=True)
+                .order_by('-created_date'))
 
 
 class Post(Model):
@@ -127,7 +128,7 @@ class Post(Model):
                               blank=True, null=True)
     review_minuses = CharField('Мінуси', max_length=1000,
                                blank=True, null=True)
-    ReviewRating = PositiveSmallIntegerField('Рейтинг',
+    review_rating = PositiveSmallIntegerField('Рейтинг огляду',
                                              blank=True, null=True)
 
     objects = Manager()

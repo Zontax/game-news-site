@@ -1,11 +1,12 @@
 from django.shortcuts import render
 from django.http import BadHeaderError, HttpRequest, JsonResponse
+from django.core.paginator import Paginator, EmptyPage, PageNotAnInteger
 from django.db.models import Count
 from django.views import View
 from django.core.mail import send_mail
 import django
 
-from app.settings import APP_NAME, EMAIL_HOST_USER
+from app.settings import APP_NAME, POSTS_IN_PAGE, EMAIL_HOST_USER
 from posts.models import Post
 from smtplib import SMTPException
 from pytils.translit import slugify
@@ -17,18 +18,25 @@ logger = logging.getLogger(__name__)
 class IndexView(View):
 
     def get(self, request: HttpRequest):
-        posts = (
-            Post.objects
-            .filter(is_publicated=True)
-            .order_by('-created_date')[:8]
+        page = request.GET.get('page', 1)
+
+        posts = (Post.published.all()
+                 .select_related('type', 'user')
+                 .annotate(comment_count=Count('comments')))
+
+        latest_posts = (
+            Post.published.filter(type__name='Огляди')[:5]
             .select_related('type', 'user')
             .annotate(comment_count=Count('comments')))
 
-        latest_posts = (
-            Post.objects
-            .filter(type__name='Огляди', is_publicated=True)[:5]
-            .select_related('type', 'user')
-            .annotate(comment_count=Count('comments')))
+        paginator = Paginator(posts, POSTS_IN_PAGE)
+
+        try:
+            posts = paginator.page(page)
+        except PageNotAnInteger:
+            posts = paginator.page(1)
+        except EmptyPage:
+            posts = paginator.page(paginator.num_pages)
 
         context = {
             'posts': posts,
