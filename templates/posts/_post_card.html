@@ -1,4 +1,4 @@
-{% load static main_tags %}
+{% load static main_tags posts_tags %}
 
 {% if post.is_publicated %}
     <div id="post-block" class="row bg-white border-bottom">
@@ -65,7 +65,8 @@
 
         {% if post.review_rating and post.type.pk == 2 %}
             <div class="card-review-rating col-auto pr-0 p-2">
-                <a href="{% url 'posts:detail' post.slug %}">
+                <a href="{% url 'posts:detail' post.slug %}"
+                    style="background: {{ post.review_rating|rating_to_color }};">
                     {{ post.review_rating }}
                 </a>
             </div>

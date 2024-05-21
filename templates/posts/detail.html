@@ -78,7 +78,9 @@
             </div>
 
             {% if post.review_rating %}
-                <div class="review-rating" style="{% if user_agent.is_mobile %}font-size: 40px;{% endif %}">
+                <div class="review-rating" 
+                    style="background: {{ post.review_rating|rating_to_color }}; 
+                    {% if user_agent.is_mobile %}font-size: 40px;{% endif %}">
                     {{ post.review_rating }}
                     <text class="ml-5">
                         {{ post.review_rating|rating_to_text }}

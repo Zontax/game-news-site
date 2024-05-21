@@ -1,4 +1,3 @@
-from django.utils.http import urlencode
 from django import template
 
 from posts.models import PostType
@@ -33,8 +32,19 @@ def rating_to_text(value):
         return 'ЖАХЛИВО'
 
 
-@register.simple_tag(takes_context=True)
-def change_params(context, **kwargs):
-    query = context['request'].GET.dict()
-    query.update(kwargs)
-    return urlencode(query)
+@register.filter()
+def rating_to_color(value):
+    if value >= 90:
+        return 'rgb(61, 205, 9)'
+    elif value >= 80:
+        return 'rgb(61, 205, 9)'
+    elif value >= 70:
+        return 'rgb(61, 205, 9)'
+    elif value >= 60:
+        return 'orange'
+    elif value >= 50:
+        return 'darkorange'
+    elif value >= 40:
+        return 'orangered'
+    else:
+        return 'red'
