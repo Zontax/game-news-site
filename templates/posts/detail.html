@@ -133,8 +133,8 @@
                                     {{ tag.description }}
                                 {% else %}
                                     {{ tag.name }}
-                                {% endif %} 
-                                    "> {{ tag }}</a>, 
+                                {% endif %}
+                                    "> {{ tag }}</a>{% if not forloop.last %}, {% endif %}
                         {% endfor %}
                     </p>
                 </i>
@@ -176,7 +176,7 @@
 <div class="post-comments">
     <div class="row bg-white mt-3 overflow-hidden flex-md-row shadow-sm h-md-250 position-relative">
         <div class="col d-flex flex-column position-static">
-            <h4 id="comments" class="pt-3">Коментарі ({{ post.comment_count }}):</h4>
+            <h4 id="comments" class="pt-3">Коментарі ({{ post.comments.count }}):</h4>
             <form class="mb-3" method="post" action="{% url 'posts:detail' post.slug %}">
                 {% csrf_token %}
                 <input id="post_id" name="post_id" value="{{ post.id }}" required hidden>

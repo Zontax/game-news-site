@@ -4,10 +4,12 @@
     <div id="comment-{{ comment.pk }}" class="row bg-white mt-1">
         <div class="col p-4 mb-1 d-flex flex-column position-static">
             <div class="d-inline-block text-primary-emphasis">
+                
                 <p>
                     <a href="{% url 'user:detail' comment.user.username %}" 
                         title="{{ comment.user.username }}">
-                        {{ comment.user.first_name }}{% if comment.is_edited %} (edited){% endif %} 
+                        {% firstof user.get_full_name user.get_username %}
+                        {% if comment.is_edited %} (edited){% endif %} 
                     </a>
                     <i class="mb-1 text-body-secondary float-right">
                         {{ comment.created_date|naturalday }}

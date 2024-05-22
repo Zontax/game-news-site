@@ -1,7 +1,7 @@
 from django.shortcuts import render
 from django.http import BadHeaderError, HttpRequest, JsonResponse
 from django.core.paginator import Paginator, EmptyPage, PageNotAnInteger
-from django.db.models import Count
+from django.db.models import Count, Q
 from django.views import View
 from django.core.mail import send_mail
 import django
@@ -9,7 +9,6 @@ import django
 from app.settings import APP_NAME, POSTS_IN_PAGE, EMAIL_HOST_USER
 from posts.models import Post
 from smtplib import SMTPException
-from pytils.translit import slugify
 import logging
 
 logger = logging.getLogger(__name__)
@@ -27,8 +26,9 @@ class IndexView(View):
         latest_posts = (
             Post.published.filter(type__name='Огляди')[:5]
             .select_related('type', 'user')
-            .annotate(comment_count=Count('comments')))
-
+            .annotate(comment_count=Count('comments',
+                                          Q(comments__is_active=True)))
+        )
         paginator = Paginator(posts, POSTS_IN_PAGE)
 
         try:

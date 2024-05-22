@@ -75,7 +75,7 @@ class PostAdmin(admin.ModelAdmin):
 class PostCommentAdmin(admin.ModelAdmin):
     list_display = ['id', 'text', 'user', 'is_edited', 'created_date']
     list_display_links = ['text']
-    list_filter = ['created_date']
+    list_filter = ['created_date', 'is_active']
     list_per_page = 20
     readonly_fields = ['created_date', 'edit_date']
     search_fields = ['text']

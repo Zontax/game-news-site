@@ -73,7 +73,6 @@ class PostDetailView(DetailView):
     slug_url_kwarg = 'post_slug'
     context_object_name = 'post'
     queryset = (Post.published
-                .annotate(comment_count=Count('comments', Q(comments__is_active=True)))
                 .prefetch_related(
                     Prefetch('comments', PostComment.active
                              .select_related('user')
@@ -104,7 +103,8 @@ class PostDetailView(DetailView):
         latest_posts = (Post.published
                         .filter(type=self.object.type)[:5]
                         .select_related('type', 'user')
-                        .annotate(comment_count=Count('comments'))
+                        .annotate(comment_count=Count('comments',
+                                                      Q(comments__is_active=True)))
                         )
         context = super().get_context_data(**kwargs)
         context['title'] = self.object.title
