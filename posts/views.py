@@ -1,4 +1,4 @@
-from django.db.models import Count, Prefetch
+from django.db.models import Count, Prefetch, Q
 from django.http import Http404, HttpRequest, HttpResponseForbidden
 from django.shortcuts import get_object_or_404, redirect, render
 from django.urls import reverse, reverse_lazy
@@ -73,9 +73,9 @@ class PostDetailView(DetailView):
     slug_url_kwarg = 'post_slug'
     context_object_name = 'post'
     queryset = (Post.published
-                .annotate(comment_count=Count('comments'))
+                .annotate(comment_count=Count('comments', Q(comments__is_active=True)))
                 .prefetch_related(
-                    Prefetch('comments', PostComment.objects
+                    Prefetch('comments', PostComment.active
                              .select_related('user')
                              .filter(parent__isnull=True)
                              .annotate(replies_count=Count('childrens')))

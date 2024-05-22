@@ -249,23 +249,31 @@ class FakePostCreateAPIView(APIView):
                 r_date = datetime.now(
                     UTC) + timedelta(days=r_days, hours=r_hours)
 
+                type = random.choice(PostType.objects.all())
+                
                 # Create fake post
                 post = Post.objects.create(
                     user=random.choice(User.objects.all()[1:]),
-                    type=random.choice(PostType.objects.all()),
+                    type=type,
                     title=title,
                     slug=slug,
                     content=content,
                     image=image_path,
                     created_date=r_date,
                 )
+                
+                if type.id == 2:
+                    post.review_rating = randint(10, 98)
+                    post.review_pluses = text.title()
+                    post.review_minuses = text.title()
+                    post.save()
 
                 # Create fake comments
                 for i in range(randint(1, 5)):
                     PostComment.objects.create(
                         post=post,
                         user=random.choice(User.objects.all()[1:]),
-                        text=text.text(1),
+                        text=text.title(),
                         created_date=r_date,
                     )
 

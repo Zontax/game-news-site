@@ -193,9 +193,7 @@
         </div>
     </div>
 
-    {% if post.comments %}
-        {% include 'posts/_comment_tree.html' with comments=post.comments %}
-    {% endif %}
+    {% include 'posts/_comment_tree.html' with comments=post.comments.all %}
 </div>
 
 {% with modal_image=post.image modal_title=post.title %}

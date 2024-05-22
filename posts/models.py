@@ -54,7 +54,7 @@ class PostTopic(Model):
 
     def __str__(self):
         return self.name
-    
+
     def get_absolute_url(self):
         return reverse('posts:topic', args=[self.slug])
 
@@ -79,7 +79,7 @@ class PostTag(Model):
 
 
 class PostPublishedManager(Manager):
-    """Усі опубліковані публікації"""
+    """Усі опубліковані публікації."""
 
     def get_queryset(self):
         return (super().get_queryset()
@@ -100,7 +100,8 @@ class Post(Model):
     type = ForeignKey(PostType, SET_NULL, related_name='posts',
                       null=True, verbose_name='Тип')
     title = CharField('Назва', max_length=130, unique=True)
-    slug = SlugField('Slug', max_length=150, unique=True, unique_for_date='created_date')
+    slug = SlugField('Slug', max_length=150, unique=True,
+                     unique_for_date='created_date')
     summary = CharField('Короткий опис', max_length=200, default='')
     content = CKEditor5Field('Текст', config_name='extends', max_length=50000)
     meta_description = CharField('SEO Інформація', max_length=400,
@@ -129,7 +130,7 @@ class Post(Model):
     review_minuses = CharField('Мінуси', max_length=1000,
                                blank=True, null=True)
     review_rating = PositiveSmallIntegerField('Рейтинг огляду',
-                                             blank=True, null=True)
+                                              blank=True, null=True)
 
     objects = Manager()
     published = PostPublishedManager()
@@ -151,6 +152,15 @@ class Post(Model):
         return self.likes.count()
 
 
+class PostCommentActiveManager(Manager):
+    """Усі активні коментарі."""
+
+    def get_queryset(self):
+        return (super().get_queryset()
+                .filter(is_active=True)
+                .order_by('-created_date'))
+
+
 class PostComment(Model):
     """
     Модель коментарів до публікацій.
@@ -166,6 +176,10 @@ class PostComment(Model):
     created_date = DateTimeField('Дата', auto_now_add=True)
     edit_date = DateTimeField('Дата редагування', auto_now=True,
                               blank=True, null=True)
+    is_active = BooleanField('Активний', default=True)
+
+    objects = Manager()
+    active = PostCommentActiveManager()
 
     class Meta():
         db_table = 'comments'
