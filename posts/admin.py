@@ -33,7 +33,7 @@ class PostAdmin(admin.ModelAdmin):
     list_display = ['id', 'title', 'display_image', 'type', 'created_date']
     list_display_links = ['title']
     list_editable = ['type']
-    list_filter = ['created_date', 'type']
+    list_filter = ['created_date', 'type', 'is_publicated']
     list_per_page = 20
     search_fields = ['title', 'content', 'meta_description']
     filter_horizontal = ('topics', 'tags')

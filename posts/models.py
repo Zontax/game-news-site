@@ -9,6 +9,7 @@ from colorfield.fields import ColorField
 from django_ckeditor_5.fields import CKEditor5Field
 from django.utils.timezone import now
 from app.settings import MEDIA_ROOT
+from datetime import datetime, UTC
 import os
 
 
@@ -106,8 +107,8 @@ class Post(Model):
     content = CKEditor5Field('Текст', config_name='extends', max_length=50000)
     meta_description = CharField('SEO Інформація', max_length=400,
                                  blank=True, null=True)
-    image = ImageField('Зображення', upload_to='images/posts_title')
-    detail_image = ImageField('Фон', upload_to='images/posts_detail_image',
+    image = ImageField('Зображення', upload_to='images/posts/%Y/%m/%d/')
+    detail_image = ImageField('Фон', upload_to='images/posts/%Y/%m/%d/detail/',
                               blank=True, null=True)
     topics = ManyToManyField(PostTopic, related_name='posts',
                              blank=True, verbose_name='Рубрики')
@@ -143,7 +144,7 @@ class Post(Model):
         indexes = [Index(fields=['-created_date', 'slug'])]
 
     def __str__(self):
-        return self.title[0:30]
+        return self.title[:30]
 
     def get_absolute_url(self):
         return reverse('posts:detail', args=[self.slug])
@@ -240,3 +241,4 @@ def create_default_post_type_and_topic(sender, **kwargs):
 
 #     class Meta:
 #         db_table = 'posts_tags'
+

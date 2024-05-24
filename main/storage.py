@@ -6,7 +6,7 @@ from datetime import datetime
 import os
 
 
-class CkeditorCustomStorage(FileSystemStorage):
+class CkeditorStorage(FileSystemStorage):
     """
     Custom storage for django_ckeditor_5 images.
     """
@@ -22,5 +22,5 @@ class CkeditorCustomStorage(FileSystemStorage):
         name = os.path.join(folder_name, self.get_valid_name(name))
         return super()._save(name, content)
 
-    location = settings.MEDIA_ROOT / 'uploads/'
-    base_url = urljoin(settings.MEDIA_URL, 'uploads/')
+    location = settings.MEDIA_ROOT / 'images/posts/'
+    base_url = urljoin(settings.MEDIA_URL, 'images/posts/')

@@ -265,7 +265,7 @@ CKEDITOR_5_ALLOW_ALL_FILE_TYPES = False
 CKEDITOR_5_UPLOAD_FILE_TYPES = ['.jpg', 'jpeg', 'webp', 'png']
 CKEDITOR_5_UPLOAD_PATH = MEDIA_ROOT / 'images' / 'posts'
 CKEDITOR_5_CUSTOM_CSS = 'css/ck-styles.css'
-CKEDITOR_5_FILE_STORAGE = 'main.storage.CkeditorCustomStorage'
+CKEDITOR_5_FILE_STORAGE = 'main.storage.CkeditorStorage'
 CKEDITOR_5_CONFIGS = {
     'default': {
         'toolbar': ['heading', '|', 'bold', 'italic', 'link',
