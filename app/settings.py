@@ -15,7 +15,7 @@ SECRET_KEY = env.str('DJANGO_SECRET_KEY', get_random_secret_key())
 
 DEBUG = env.bool('DJANGO_DEBUG', False)
 
-ALLOWED_HOSTS = [env.str('ALLOWED_HOSTS', '*')]
+ALLOWED_HOSTS = env.str('ALLOWED_HOSTS').split(',')
 
 INSTALLED_APPS = [
     'filebrowser',
@@ -29,6 +29,7 @@ INSTALLED_APPS = [
     'django.contrib.staticfiles',
     'django.contrib.postgres',
     'django.contrib.sites',
+    'django.contrib.sitemaps',
     'django.contrib.humanize',
     'rest_framework',
     # Apps
@@ -39,17 +40,17 @@ INSTALLED_APPS = [
     # Installs
     'drf_spectacular',
     'debug_toolbar',
-    'phonenumber_field',
-    'django_recaptcha',
-    'django_ckeditor_5',
-    # 'ckeditor',
-    # 'ckeditor_uploader',
-    'django_bootstrap5',
-    'gm2m',
+    'django_extensions',
+    'social_django',
     # 'allauth',
     # 'allauth.account',
     # 'allauth.socialaccount',
     # 'allauth.socialaccount.providers.google',
+    'phonenumber_field',
+    'django_recaptcha',
+    'django_ckeditor_5',
+    'django_bootstrap5',
+    'gm2m',
 ]
 
 MIDDLEWARE = [
@@ -264,11 +265,13 @@ CKEDITOR_5_ALLOW_ALL_FILE_TYPES = False
 CKEDITOR_5_UPLOAD_FILE_TYPES = ['.jpg', 'jpeg', 'webp', 'png']
 CKEDITOR_5_UPLOAD_PATH = MEDIA_ROOT / 'images' / 'posts'
 CKEDITOR_5_CUSTOM_CSS = 'css/ck-styles.css'
+CKEDITOR_5_FILE_STORAGE = 'main.storage.CkeditorCustomStorage'
 CKEDITOR_5_CONFIGS = {
     'default': {
         'toolbar': ['heading', '|', 'bold', 'italic', 'link',
                     'bulletedList', 'numberedList', 'blockQuote', 'imageUpload', ],
         'language': ['uk', 'en'],
+        'allowedContent': True,
     },
     'extends': {
         'blockToolbar': [
@@ -280,10 +283,10 @@ CKEDITOR_5_CONFIGS = {
         ],
         'toolbar': [
             'heading', 'sourceEditing', 'bold', 'italic', '|',
-            'outdent', 'indent', '|',   
-            'link', 'underline', 'strikethrough', 'code', 'subscript', 'superscript', 
-            '|', 'blockQuote', 'highlight', 'codeBlock', 'insertImage', 'mediaEmbed', 'insertTable', 
-            '|', 'bulletedList', 'numberedList', 'todoList', 
+            'outdent', 'indent', '|',
+            'link', 'underline', 'strikethrough', 'code', 'subscript', 'superscript',
+            '|', 'blockQuote', 'highlight', 'codeBlock', 'insertImage', 'mediaEmbed', 'insertTable',
+            '|', 'bulletedList', 'numberedList', 'todoList',
             '|', 'fontSize', 'fontFamily', 'fontColor', 'fontBackgroundColor', 'removeFormat',
         ],
         'image': {
@@ -323,11 +326,20 @@ CKEDITOR_5_CONFIGS = {
             ]
         }
     },
+    'comments': {
+        'toolbar': [
+            'bold', 'italic', 'underline',
+            'link', 'bulletedList', 'numberedList', 'code', 'codeBlock', 'insertImage', 'mediaEmbed'
+        ],
+        'width': 'auto',
+        'toolbarCanCollapse': True,
+        'removePlugins': ['WordCount'],
+    },
     'list': {
         'properties': {
             'styles': 'true',
             'startIndex': 'true',
             'reversed': 'true',
         }
-    }
+    },
 }

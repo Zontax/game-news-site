@@ -1,12 +1,26 @@
-# import os
-# from urllib.parse import urljoin
+from django.core.files.storage import FileSystemStorage
 
-# from django.conf import settings
-# from django.core.files.storage import FileSystemStorage
+from app import settings
+from urllib.parse import urljoin
+from datetime import datetime
+import os
 
 
-# class CkeditorStorage(FileSystemStorage):
-#     """Custom storage for django_ckeditor_5 images."""
+class CkeditorCustomStorage(FileSystemStorage):
+    """
+    Custom storage for django_ckeditor_5 images.
+    """
 
-#     location = os.path.join(settings.MEDIA_ROOT, 'django_ckeditor_5')
-#     base_url = urljoin(settings.MEDIA_URL, 'django_ckeditor_5/')
+    def get_folder_name(self):
+        return datetime.now().strftime('%Y/%m/%d')
+
+    def get_valid_name(self, name):
+        return name
+
+    def _save(self, name, content):
+        folder_name = self.get_folder_name()
+        name = os.path.join(folder_name, self.get_valid_name(name))
+        return super()._save(name, content)
+
+    location = settings.MEDIA_ROOT / 'uploads/'
+    base_url = urljoin(settings.MEDIA_URL, 'uploads/')

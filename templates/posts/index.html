@@ -34,7 +34,10 @@
             </h2>
         <!-- Topic -->
         {% elif topic %}
-            <h2 class="mt-2 text-center">{{ topic.name }}</h2>    
+            <h2 class="mt-2 text-center">{{ topic.name|upper }}</h2>
+        <!-- Tag -->
+        {% elif tag %}
+            <h2 class="mt-2 text-center">{{ tag.name|upper }}</h2>    
         {% endif %}
         <!-- Posts list -->
         {% include 'posts/_posts_list.html' %}

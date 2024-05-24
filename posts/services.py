@@ -1,9 +1,8 @@
-from django.contrib.postgres.search import SearchQuery, SearchRank, SearchVector, SearchHeadline
+from django.contrib.postgres.search import SearchVector, SearchQuery, SearchRank, \
+    SearchHeadline, TrigramSimilarity
 from django.db.models import Model, Q
 
 from posts.models import Post
-from functools import reduce
-from operator import and_
 from uuid import uuid1
 import os
 
@@ -18,32 +17,40 @@ def get_image_path(instance: Model, filename):
     return result
 
 
-def q_search(query):
+def post_search(query: str):
     """
-    Пошук (від postgre)
+    Повнотекстовий пошук
     """
-    if isinstance(query, str):
-        vector = SearchVector('title')
-        query = SearchQuery(query)
+    search_vector = SearchVector('title', weight='A') + \
+        SearchVector('content', weight='B')
+    search_query = SearchQuery(query)
 
-        result = (
-            Post.published
-                .annotate(rank=SearchRank(vector, query))
-                .filter(rank__gt=0)
-                .order_by('-rank')
-        )
-        result = result.annotate(
-            headline=SearchHeadline(
-                'title',
-                query,
-                start_sel=start_sel,
-                stop_sel=stop_sel,
-            ))
-        result = result.annotate(
-            bodyline=SearchHeadline(
-                'content',
-                query,
-                start_sel=start_sel,
-                stop_sel=stop_sel,
-            ))
-        return result
+    # results = (Post.published
+    #            .annotate(
+    #                search=search_vector,
+    #                rank=SearchRank(search_vector, search_query))
+    #            .filter(rank__gte=0.3)
+    #            .order_by('-rank'))
+
+    results = (Post.published
+               .annotate(similarity_title=TrigramSimilarity('title', query),
+                         similarity_content=TrigramSimilarity('content', query)
+                         )
+               .filter(Q(similarity_title__gt=0.05) | Q(similarity_content__gt=0.05))
+               .order_by('-similarity_title', '-similarity_content'))
+
+    results = results.annotate(
+        headline=SearchHeadline(
+            'title',
+            query,
+            start_sel=start_sel,
+            stop_sel=stop_sel,
+        ))
+    results = results.annotate(
+        bodyline=SearchHeadline(
+            'content',
+            query,
+            start_sel=start_sel,
+            stop_sel=stop_sel,
+        ))
+    return results

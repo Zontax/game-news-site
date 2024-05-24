@@ -1,30 +1,30 @@
 {% load main_tags humanize %}
 
 {% for comment in comments %}
-    <div id="comment-{{ comment.pk }}" class="row bg-white mt-1">
-        <div class="col p-4 mb-1 d-flex flex-column position-static">
-            <div class="d-inline-block text-primary-emphasis">
-                
-                <p>
-                    <a href="{% url 'user:detail' comment.user.username %}" 
-                        title="{{ comment.user.username }}">
-                        {% firstof user.get_full_name user.get_username %}
-                        {% if comment.is_edited %} (edited){% endif %} 
-                    </a>
-                    <i class="mb-1 text-body-secondary float-right">
-                        {{ comment.created_date|naturalday }}
-                    </i>
-                </p>
+    <div id="comment-{{ comment.pk }}" class="row mt-1">
+    
+        <div class="col-md-8 d-flex flex-column bg-white">
+            <div class="d-inline-block pt-2">
+                <a href="{% url 'user:detail' comment.user.username %}" 
+                    title="{{ comment.user.username }}">
+                    {% firstof user.get_full_name user.get_username %}
+                    {% if comment.is_edited %} (edited){% endif %} 
+                </a>
+                <i class="text-body-secondary float-right">
+                    {{ comment.created_date|naturalday }}
+                </i>
             </div>
 
-            <p class="card-text mb-auto">
+            <p class="card-text">
                 <div class="ck-content bg-light p-1">
-                    {{ comment.text|bleach_xss|safe }}
+                    {{ comment.text|bleach_comments|safe }}
                 </div>
             </p>
-            
-            <p class="card-text mb-auto">
-                <i class="btn btn-dark ml-1 float-right" 
+        </div>
+
+        <div class="col">
+            <p class="card-text mb-auto bg-white">
+                <i class="btn btn-dark ml-1" 
                     hx-get="/api/get-reply-comments/{{ comment.id }}" 
                     hx-trigger="click"
                     hx-target="#ansver-to-{{ comment.id }}">
@@ -43,13 +43,12 @@
                 {% endif %}
 
                 {% if user.is_staff %}
-                    <a href="{% url 'admin:posts_postcomment_delete' comment.id %}" 
-                        class="btn btn-danger float-right"
-                        onclick="return confirm('Ви впевнені, що хочете видалити цю публікацію?');">
+                    <a href="{% url 'posts:comment_delete' comment.id %}" 
+                        class="btn btn-danger">
                         <i class="bi bi-trash"></i>
                     </a>
                     <a href="{% url 'admin:posts_postcomment_change' comment.id %}" 
-                        class="btn btn-dark float-right">
+                        class="btn btn-dark">
                         <i class="bi bi-pencil-square"></i>
                     </a>
                 {% endif %}
@@ -57,9 +56,9 @@
         </div>
     </div>
 
-    <div id="reply-comment-{{ comment.id }}" 
+    <!-- <div id="reply-comment-{{ comment.id }}" 
         class="col p-4 ml-5 d-flex flex-column">
-    </div>
+    </div> -->
 {% endfor %}
 
 <!-- <div class="" id="reply-comment-{{ comment.id }}" >

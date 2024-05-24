@@ -21,7 +21,7 @@
                 <div id="notification"
                     class="alert alert-{% if message.tags == 'error' %}danger{% else %}{{ message.tags }}{% endif %} fade show custom-shadow" 
                     role="alert">
-                    {{ message.message|bleach_xss|safe }}
+                    {{ message.message|clear_tags|safe }}
                 </div>
             {% endfor %}
         {% else %}

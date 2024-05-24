@@ -171,7 +171,7 @@ class PostComment(Model):
                       verbose_name='Автор')
     parent = ForeignKey('self', SET_NULL, related_name='childrens',
                         blank=True, null=True, verbose_name="Відповідь на")
-    text = CKEditor5Field('Текст', config_name='extends', max_length=1000)
+    text = CKEditor5Field('Текст', config_name='comments', max_length=1000)
     is_edited = BooleanField('Змінено', default=False)
     created_date = DateTimeField('Дата', auto_now_add=True)
     edit_date = DateTimeField('Дата редагування', auto_now=True,

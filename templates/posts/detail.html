@@ -167,6 +167,11 @@
     </div>
     {% with post_list=latest_posts %}
         <div class="latest_posts col-md-3 mt-4">
+            <p>
+                <a href="{% url 'posts:feed' %}">
+                Підписатися на RSS стрічку новин
+                </a>
+            </p>
             <h4>Останні {{ post.type.name|lower }}</h4>
             {% include 'posts/_other_post_list.html' %}
         </div>
@@ -176,20 +181,20 @@
 <div class="post-comments">
     <div class="row bg-white mt-3 overflow-hidden flex-md-row shadow-sm h-md-250 position-relative">
         <div class="col d-flex flex-column position-static">
-            <h4 id="comments" class="pt-3">Коментарі ({{ post.comments.count }}):</h4>
-            <form class="mb-3" method="post" action="{% url 'posts:detail' post.slug %}">
+            <h4 id="comments" class="pt-3 pb-2">Коментарі {{ post.comments.count }}</h4>
+
+            <form method="post" action="{% url 'posts:detail' post.slug %}">
                 {% csrf_token %}
-                <input id="post_id" name="post_id" value="{{ post.id }}" required hidden>
-                <div class="form-group pt-3">
-                    <textarea class="form-control" 
-                        id="comment_text" 
-                        name="comment_text" 
-                        rows="2" 
-                        placeholder="Напишіть коментар..."
-                        required></textarea>
-                </div>
-                <button type="submit" class="btn btn-primary">Надіслати</button>
+                {{ form.text }} 
+                {{ form.media }}
+                <button type="submit" class="btn btn-primary mt-2 mb-2">Надіслати</button>
             </form>
+
+            {% if form.text.errors %}
+                    <div class="alert alert-danger alert-dismissible fade show">
+                        {{ form.avatar.errors }}
+                    </div>
+            {% endif %}
         </div>
     </div>
 

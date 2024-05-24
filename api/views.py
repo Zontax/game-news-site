@@ -13,7 +13,7 @@ from api.serializers import UserListSerializer, PostListSerializer, PostDetailSe
 from main.services import create_random_image
 from posts.models import Post, PostType, PostTag, PostTopic, PostComment
 from users.models import User
-from posts.services import q_search
+from posts.services import post_search
 
 from mimesis import Person, Text, Datetime
 from mimesis.builtins import UkraineSpecProvider
@@ -70,8 +70,7 @@ class SearchPostsAPIView(APIView):
 
         query = request.GET['q']
 
-        posts = (q_search(query)
-                 .filter(is_publicated=True)
+        posts = (post_search(query)
                  .select_related('type', 'user')
                  .annotate(comment_count=Count('comments')))
 
@@ -250,7 +249,7 @@ class FakePostCreateAPIView(APIView):
                     UTC) + timedelta(days=r_days, hours=r_hours)
 
                 type = random.choice(PostType.objects.all())
-                
+
                 # Create fake post
                 post = Post.objects.create(
                     user=random.choice(User.objects.all()[1:]),
@@ -261,7 +260,7 @@ class FakePostCreateAPIView(APIView):
                     image=image_path,
                     created_date=r_date,
                 )
-                
+
                 if type.id == 2:
                     post.review_rating = randint(10, 98)
                     post.review_pluses = text.title()

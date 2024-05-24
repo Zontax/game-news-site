@@ -44,7 +44,10 @@ def humanize_naturaltime(value):
 def bleach_xss(value):
     ALLOWED_TAGS = frozenset(
         (
+            "i",
+            "a",
             "p",
+            "b",
             "h1",
             "h2",
             "h3",
@@ -54,14 +57,10 @@ def bleach_xss(value):
             'em',
             "pre",
             "code",
-            "a",
             "abbr",
             "acronym",
-            "b",
             "blockquote",
-            "code",
             "em",
-            "i",
             "li",
             "ol",
             "strong",
@@ -87,3 +86,32 @@ def bleach_xss(value):
     }
 
     return bleach.clean(value, ALLOWED_TAGS)
+
+@register.filter
+def bleach_comments(value):
+    ALLOWED_TAGS = frozenset(
+        (
+            'a',
+            'i',
+            'p',
+            'u',
+            's',
+            'sub',
+            'sup',
+            'pre',
+            'code',
+            'blockquote',
+            'strong',
+            'span',
+            'mark',
+            'figure',
+            'img'
+        ))
+    ALLOWED_ATTRIBUTES = {
+        "a": ["href", "title", 'data-wpel-link'],
+        "figure": ["image"],
+        "img": ['href', 'title', 'src', 'srcset', 'alt', 'data-wpel-link',
+                'sizes', 'width', 'height'],
+    }
+
+    return bleach.clean(value, ALLOWED_TAGS, ALLOWED_ATTRIBUTES)
