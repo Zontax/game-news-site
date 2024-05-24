@@ -331,6 +331,17 @@ CKEDITOR_5_CONFIGS = {
             'bold', 'italic', 'underline',
             'link', 'bulletedList', 'numberedList', 'code', 'codeBlock', 'insertImage', 'mediaEmbed'
         ],
+        'image': {
+            'toolbar': ['imageTextAlternative', '|', 'imageStyle:alignLeft',
+                        'imageStyle:alignRight', 'imageStyle:alignCenter', 'imageStyle:side', '|'],
+            'styles': [
+                'full',
+                'side',
+                'alignLeft',
+                'alignRight',
+                'alignCenter',
+            ]
+        },
         'width': 'auto',
         'toolbarCanCollapse': True,
         'removePlugins': ['WordCount'],
