@@ -1,15 +1,14 @@
 from django.db.models import Model, Manager, Index, PositiveSmallIntegerField, CharField, SlugField, BooleanField, TextField, ImageField, DateTimeField, ForeignKey, ManyToManyField
 from django.db.models.signals import post_migrate, pre_delete
 from django.db.models import SET_NULL, CASCADE
+from django.utils.timezone import now
 from django.dispatch import receiver
 from django.urls import reverse
 
+from app.settings import MEDIA_ROOT
 from users.models import User
 from colorfield.fields import ColorField
 from django_ckeditor_5.fields import CKEditor5Field
-from django.utils.timezone import now
-from app.settings import MEDIA_ROOT
-from datetime import datetime, UTC
 import os
 
 

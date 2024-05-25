@@ -18,13 +18,13 @@
 
                 <div class="row">
                     <div class="col-md-12 mb-3 text-center">
-                        {% if user.avatar %}
-                            <img src="{{ user.avatar.url }}"
+                        {% if user.profile.avatar %}
+                            <img src="{{ user.profile.avatar.url }}"
                                 class="img-fluid rounded-circle"
-                                title="{{ user.avatar.name|basename }}"
-                                alt="{{ user.avatar.name|basename }}" 
+                                title="{{ user.profile.avatar.name|basename }}"
+                                alt="{{ user.profile.avatar.name|basename }}" 
                                 style="max-width: 150px;">
-                            <p class="small">зараз: {{ user.avatar.name|basename }}</p>
+                            <p class="small">зараз: {{ user.profile.avatar.name|basename }}</p>
                         {% else %}
                             <img src="{% static 'images/baseavatar.jpg' %}"
                                 alt="Аватар" class="img-fluid rounded-circle"
@@ -37,9 +37,9 @@
                             name="avatar"
                             accept="image/*">
 
-                        {% if form.avatar.errors %}
+                        {% if profile_form.avatar.errors %}
                             <div class="alert alert-danger alert-dismissible fade show">
-                                {{ form.avatar.errors }}</div>
+                                {{ profile_form.avatar.errors }}</div>
                         {% endif %}
                     </div>
                     <div class="col-md-12 mb-3">
@@ -101,45 +101,45 @@
                     <div class="col-md-12 mb-3">
                         <label for="id_phone_number" class="form-label">Номер телефону* (+380-XX-XXX-XX-XX)</label>
                         <input type="tel" class="form-control" pattern="(\+380\d{9}|0\d{9})"
-                            value="{{ form.phone_number.value|default:'' }}" 
+                            value="{{ profile_form.phone_number.value|default:'' }}" 
                             id="id_phone_number"
                             name="phone_number"
                             placeholder="+380-XX-XXX-XX-XX">
 
-                        {% if form.phone_number.errors %}
+                        {% if profile_form.phone_number.errors %}
                             <div class="alert alert-danger alert-dismissible fade show">
-                                {{ form.phone_number.errors }}</div>
+                                {{ profile_form.phone_number.errors }}</div>
                         {% endif %}
                     </div>
                     <div class="col-md-12 mb-3">
-                        <label for="id_birthday_date" class="form-label">День народження</label>
+                        <label for="id_date_of_birth" class="form-label">День народження</label>
                         <input type="date" class="form-control"
-                            value="{{ form.birthday_date.value|default:'' }}" 
-                            id="id_birthday_date"
-                            name="birthday_date"
-                            placeholder="">
+                            value="{{ profile_form.date_of_birth.value|default:'' }}" 
+                            id="id_date_of_birth"
+                            name="date_of_birth">
 
-                        {% if form.birthday_date.errors %}
+                        {% if profile_form.date_of_birth.errors %}
                             <div class="alert alert-danger alert-dismissible fade show">
-                                {{ form.birthday_date.errors }}</div>
+                                {{ profile_form.date_of_birth.errors }}</div>
                         {% endif %}
                     </div>
 
                     <div class="col-md-12 mb-3">
-                        <label for="id_description" class="form-label">Опис</label>
+                        <label for="id_bio" class="form-label">Опис</label>
                         <textarea class="form-control" 
-                            value="{{ form.description.value|default:'' }}" 
-                            id="id_description" 
-                            name="description" 
-                            placeholder="Опишіть себе">{{ form.description.value|default:'' }}</textarea>
+                            value="{{ profile_form.bio.value|default:'' }}" 
+                            id="id_bio" 
+                            name="bio" 
+                            placeholder="Опишіть себе">{{ profile_form.bio.value|default:'' }}</textarea>
                     
-                        {% if form.description.errors %}
+                        {% if profile_form.bio.errors %}
                             <div class="alert alert-danger alert-dismissible fade show">
-                                {{ form.description.errors }}</div>
+                                {{ profile_form.bio.errors }}</div>
                         {% endif %}
                     </div>
                 </div>
                 <button type="submit" class="btn btn-dark">Зберегти зміни</button>
+                
                 <a class="btn btn-dark float-right" href="{% url 'user:detail' user.username %}">
                     Дивитись профіль
                 </a>

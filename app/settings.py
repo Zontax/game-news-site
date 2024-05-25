@@ -41,16 +41,15 @@ INSTALLED_APPS = [
     'drf_spectacular',
     'debug_toolbar',
     'django_extensions',
-    'social_django',
-    # 'allauth',
-    # 'allauth.account',
-    # 'allauth.socialaccount',
-    # 'allauth.socialaccount.providers.google',
     'phonenumber_field',
     'django_recaptcha',
     'django_ckeditor_5',
     'django_bootstrap5',
     'gm2m',
+    'allauth',
+    'allauth.account',
+    'allauth.socialaccount',
+    'allauth.socialaccount.providers.google',
 ]
 
 MIDDLEWARE = [
@@ -65,6 +64,7 @@ MIDDLEWARE = [
     'main.middleware.PrintRequestInfoMiddleware',
     # Installs
     'debug_toolbar.middleware.DebugToolbarMiddleware',
+    'allauth.account.middleware.AccountMiddleware',
 ]
 
 ROOT_URLCONF = 'app.urls'
@@ -88,6 +88,7 @@ TEMPLATES = [
 
 AUTHENTICATION_BACKENDS = [
     'django.contrib.auth.backends.ModelBackend',
+    'allauth.account.auth_backends.AuthenticationBackend',
 ]
 
 WSGI_APPLICATION = 'app.wsgi.application'
@@ -214,8 +215,21 @@ REST_FRAMEWORK = {
     'DEFAULT_SCHEMA_CLASS': 'drf_spectacular.openapi.AutoSchema',
 }
 
-# Custom vars
 SITE_ID = 1
+SOCIALACCOUNT_PROVIDERS = {
+    'google': {
+        'SCOPE': [
+            'profile',
+            'email',
+        ],
+        'AUTH_PARAMS': {
+            'access_type': 'online',
+        },
+        'OAUTH_PKCE_ENABLED': True,
+    }
+}
+
+# Custom vars
 APP_NAME = env.str('APP_NAME', 'Site')
 ADMINS = [(APP_NAME, EMAIL_HOST_USER)]
 POSTS_IN_PAGE = 8

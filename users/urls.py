@@ -14,5 +14,4 @@ urlpatterns = [
     path('password_reset/', PasswordResetView.as_view(), name='password_reset'),
     path('password_reset_confirm/<token>/', UserPasswordResetConfirmView.as_view(), name='password_reset_confirm'),
     path('detail/<str:username>/', UserDetailView.as_view(), name='detail'),
-    # path('', include('django.contrib.auth.urls')),
 ]

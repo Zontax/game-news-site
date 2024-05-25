@@ -19,7 +19,7 @@
                 <div class="card mb-4 custom-shadow">
                     <div class="row">
                         <div class="col-md-4">
-                            <img src="{% if detail_user.avatar %}{{ detail_user.avatar.url }}{% else %}
+                            <img src="{% if detail_user.profile.avatar %}{{ detail_user.profile.avatar.url }}{% else %}
                             
                             {% static 'images/baseavatar.jpg' %}{% endif %}"
                                 class="img-thumbnail rounded-0"
@@ -38,9 +38,8 @@
                         <div class="col-md-8">
                             <div class="card-body">
                                 <h5 class="card-title">
-                                    <text class="text-uppercase"
-                                        title="{{ detail_user.username }}">
-                                        {{ detail_user.first_name }} {{ detail_user.last_name }}
+                                    <text class="text-uppercase">
+                                        {{ detail_user.get_full_name|default:detail_user.username }}
                                     </text> 
                                     <i class="bi bi-arrow-right-short"></i> 
                                     <text class="text-muted">{{ detail_user.username }}</text>
@@ -51,8 +50,8 @@
                                 </h5>
 
                                 <div class="ck-content">
-                                    {% if detail_user.description %}
-                                        {{ detail_user.description|linebreaks }}
+                                    {% if detail_user.profile.bio %}
+                                        {{ detail_user.profile.bio|linebreaks }}
                                     {% endif %}
                                 </div>
 
@@ -80,7 +79,7 @@
     </div>
 </div>
 
-{% with modal_image=detail_user.avatar modal_title=detail_user.username %}
+{% with modal_image=detail_user.profile.avatar modal_title=detail_user.username %}
     {% include '_modal_image_preview.html' %}
 {% endwith %}
 

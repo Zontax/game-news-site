@@ -14,8 +14,8 @@ from django.views import View
 from app.settings import EMAIL_HOST_USER, APP_NAME, MEDIA_ROOT
 from main.services import create_random_image
 from posts.models import Post
-from users.models import User
-from users.forms import UserLoginForm, UserRegisterForm, UserProfileForm, ResetTokenForm, ResetPasswordForm, SetNewPasswordForm
+from users.models import User, Profile
+from users.forms import UserEditForm, ProfileEditForm, UserLoginForm, UserRegisterForm, ResetTokenForm, ResetPasswordForm, SetNewPasswordForm
 from users.services import generate_token
 from users.tasks import send_email_to, clear_activation_key
 
@@ -76,28 +76,32 @@ class UserLoginView(LoginView):
         return reverse('user:profile')
 
 
-@method_decorator(login_required, name='dispatch')
 class UserProfileView(LoginRequiredMixin, View):
     template_name = 'users/profile.html'
 
     def get(self, request: HttpRequest):
-        form = UserProfileForm(instance=request.user)
+        user_form = UserEditForm(instance=request.user)
+        profile_form = ProfileEditForm(instance=request.user.profile)
 
         context = {
-            'form': form,
+            'form': user_form,
+            'profile_form': profile_form,
         }
         return render(request, self.template_name, context)
 
     def post(self, request):
-        form = UserProfileForm(
-            data=request.POST, instance=request.user, files=request.FILES)
+        form = UserEditForm(data=request.POST, instance=request.user)
+        profile_form = ProfileEditForm(data=request.POST,
+                                       instance=request.user.profile, files=request.FILES)
 
-        if form.is_valid():
+        if form.is_valid() and profile_form.is_valid():
             form.save()
+            profile_form.save()
             messages.success(request, 'Дані користувача успішно змінено')
 
         context = {
             'form': form,
+            'profile_form': profile_form,
         }
         return render(request, self.template_name, context)
 
@@ -130,7 +134,7 @@ class UserRegisterConfirmView(View):
     def get(self, request: HttpRequest, token):
         try:
             user = User.objects.get(activation_key=token)
-
+            
         except User.DoesNotExist:
             messages.error(
                 request, 'Неправильний код активації або код застарів')
@@ -140,13 +144,13 @@ class UserRegisterConfirmView(View):
             messages.error(request, 'Помилка активації')
             return redirect('user:reset_wait')
 
-        image_path = f'images/users/avatar/{user.username}.png'
+        image_path = f'images/users/{user.id}/avatar/{user.username}.png'
         create_random_image(MEDIA_ROOT / image_path)
-
+        
         user.is_active = True
         user.activation_key = None
-        user.avatar = image_path
-        user.save(update_fields=['is_active', 'activation_key', 'avatar'])
+        user.profile.avatar = image_path
+        user.save(update_fields=['is_active', 'activation_key'])
 
         auth.login(request, user)
         messages.success(request, 'Ви успішно зареєструвались')
@@ -161,7 +165,7 @@ class PasswordResetView(FormView):
 
     def form_valid(self, form: ResetPasswordForm):
         email = form.cleaned_data['email']
-        user: User = User.objects.filter(email=email).first()
+        user = User.objects.filter(email=email).first()
 
         if user:
             token = generate_token()
@@ -232,7 +236,7 @@ class UserDetailView(DetailView):
     def get(self, request: HttpRequest, username):
         user = get_object_or_404(User, username=username)
         context = {
-            'title': user.description,
+            'title': user.username,
             'detail_user': user,
             'posts_count': Post.published.filter(user=user).count(),
         }
