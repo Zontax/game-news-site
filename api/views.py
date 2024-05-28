@@ -1,29 +1,29 @@
 from django.db.models import Count
 from django.http import HttpRequest, HttpResponse, JsonResponse
-from django.shortcuts import get_object_or_404
 from django.template.response import TemplateResponse
 from django.utils import timezone
-from django.utils.decorators import method_decorator
-from django.contrib.auth.decorators import user_passes_test
-from rest_framework.permissions import IsAuthenticated
+from django.contrib.auth import get_user_model
+from rest_framework.permissions import IsAuthenticated, IsAdminUser
 from rest_framework.response import Response
 from rest_framework.views import APIView
 
-from api.serializers import UserListSerializer, PostListSerializer, PostDetailSerializer
+from app.settings import MEDIA_ROOT
 from main.services import create_random_image
+from api.serializers import UserListSerializer, PostListSerializer, PostDetailSerializer
 from posts.models import Post, PostType, PostTag, PostTopic, PostComment
-from users.models import User
 from posts.services import post_search
 
 from mimesis import Person, Text, Datetime
 from mimesis.builtins import UkraineSpecProvider
-from datetime import datetime, timedelta, UTC
+from datetime import timedelta
 from random import randint
 from pytils.translit import slugify
-from app.settings import BASE_DIR
+
 import logging
 import random
 import uuid
+
+User = get_user_model()
 
 person = Person('uk')
 text = Text('uk')
@@ -61,6 +61,16 @@ class DateTimeAPIView(APIView):
         return JsonResponse(json_data)
 
 
+class DateTimeSecondsAPIView(APIView):
+    """
+    API endpoint, який повертає поточну дату й час сервера.
+    """
+
+    def get(self, request):
+
+        return Response(timezone.now().second)
+
+
 class SearchPostsAPIView(APIView):
     """
     API endpoint that searches posts based on a query.
@@ -87,75 +97,6 @@ class GetReplyCommentsAPIView(APIView):
             'created_date').annotate(replies_count=Count('replies'))
 
         return TemplateResponse(request, 'posts/_comment_tree.html', {'comments': replies})
-
-
-class PostLikeAPIView(APIView):
-    """
-    API endpoint для додавання користувачем лайків на публікацію.
-    """
-
-    def get(self, request: HttpRequest, post_id):
-        post = get_object_or_404(Post, id=post_id)
-        user: User = request.user
-
-        if user.is_authenticated:
-            if post.likes.filter(id=user.id).exists():
-                post.likes.remove(user)
-            else:
-                post.likes.add(user)
-                if post.dislikes.filter(id=user.id).exists():
-                    post.dislikes.remove(user)
-
-            data = f'➕ {post.likes.count()}'
-        else:
-            data = '➕ Зареєструйтесь'
-
-        return HttpResponse(data)
-
-
-class PostDislikeAPIView(APIView):
-    """
-    API endpoint для додавання користувачем дизлайків на публікацію.
-    """
-
-    def get(self, request: HttpRequest, post_id):
-        post = get_object_or_404(Post, id=post_id)
-        user: User = request.user
-
-        if user.is_authenticated:
-            if post.dislikes.filter(id=user.id).exists():
-                post.dislikes.remove(user)
-            else:
-                post.dislikes.add(user)
-                if post.likes.filter(id=user.id).exists():
-                    post.likes.remove(user)
-
-            return HttpResponse(f'➖ {post.dislikes.count()}')
-
-        return HttpResponse('➖ Зареєструйтесь')
-
-
-class PostSaveAPIView(APIView):
-    """
-    API endpoint для додання публікаціїї у "збережені" користувачів.
-    """
-    permission_classes = [IsAuthenticated]
-
-    def get(self, request: HttpRequest, post_id):
-        post = get_object_or_404(Post, id=post_id)
-        user: User = request.user
-
-        if user.is_authenticated:
-            if post.saves.filter(id=user.id).exists():
-                post.saves.remove(user)
-                data = f'<i class="bi bi-bookmark"></i> {post.saves.count()}'
-            else:
-                post.saves.add(user)
-                data = f'<i class="bi bi-bookmark-check-fill"></i> {post.saves.count()}'
-        else:
-            data = '<i class="bi bi-bookmark"></i> Зареєструйтесь'
-
-        return HttpResponse(data)
 
 
 class UserListAPIView(APIView):
@@ -224,20 +165,29 @@ def is_admin(user):
     return user.is_superuser
 
 
-@method_decorator(user_passes_test(is_admin), name='dispatch')
+# @method_decorator(user_passes_test(is_admin), name='dispatch')
 class FakePostCreateAPIView(APIView):
     """
     API endpoint, який створює публікації для тестування роботи сайту.
     """
+    permission_classes = [IsAdminUser]
 
     def get(self, request: HttpRequest, count=5):
         try:
             for i in range(count):
                 uid = uuid.uuid4().hex
-                image_path = f'images/posts_title/{uid}.png'
-                full_image_path = str(BASE_DIR / 'media/' / image_path)
+                date = timezone.now()
+                month = date.month
+                day = date.day
 
-                create_random_image(full_image_path)
+                if day < 10:
+                    day = f'0{day}'
+                if month < 10:
+                    month = f'0{month}'
+
+                image_path = f'images/posts/{date.year}/{month}/{day}/{uid}.png'
+                create_random_image(MEDIA_ROOT / image_path)
+                print(image_path)
 
                 title = f'{text.title()[:80]} {uid}'[:130]
                 slug = slugify(f'{uid}')[:130]
@@ -245,8 +195,7 @@ class FakePostCreateAPIView(APIView):
 
                 r_days = randint(-3, 3)
                 r_hours = randint(-12, 12)
-                r_date = datetime.now(
-                    UTC) + timedelta(days=r_days, hours=r_hours)
+                r_date = timezone.now() + timedelta(days=r_days, hours=r_hours)
 
                 type = random.choice(PostType.objects.all())
 
@@ -295,3 +244,38 @@ class FakePostCreateAPIView(APIView):
             }
             logger.error(e)
             return Response(data, 500)
+
+
+class CheckUsernameAPIView(APIView):
+    """
+    API endpoint, який перевіряє чи є користувач з таким username
+    """
+
+    def get(self, request: HttpRequest):
+        username = request.GET['username'].strip()
+        
+        if username.__len__() == 0:
+            return HttpResponse()
+        elif username.__len__() < 3:
+            return HttpResponse(f"<div id='check-username' class='form-error'>Закоротке ім'я {username.__len__()}</div>")
+        
+        if User.objects.filter(username=username).exists():
+            data = "<div id='check-username' class='form-error'>Це ім'я зайняте</div>"
+        else:
+            data = "<div id='check-username' class='form-success'>Ім'я вільне</div>"
+
+        return HttpResponse(data)
+
+
+class CheckEmailAPIView(APIView):
+    """
+    API endpoint, який перевіряє чи є користувач з таким email
+    """
+
+    def get(self, request: HttpRequest):
+        email = request.GET['email'].strip()
+        
+        if User.objects.filter(email=email).exists() and email != '':
+            return HttpResponse("<div class='form-error'>Користувач з таким email вже існує</div>")
+        
+        return HttpResponse()

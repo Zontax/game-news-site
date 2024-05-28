@@ -1,6 +1,6 @@
 from django import template
 
-from posts.models import PostType
+from posts.models import Post, PostType
 
 register = template.Library()
 

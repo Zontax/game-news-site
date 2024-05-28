@@ -73,7 +73,7 @@ class Profile(Model):
         ordering = ['user__date_joined']
 
     def __str__(self):
-        return f'Профіль [{self.user.username}]'
+        return f'Профіль користувача ({self.user.username})'
 
     def get_absolute_url(self):
         return reverse('user:detail', args=[self.user.username])

@@ -1,12 +1,11 @@
-from django.http import HttpRequest
+from django.http import HttpRequest, HttpResponse
 from django.contrib.auth.mixins import LoginRequiredMixin
 from django.contrib.auth.decorators import login_required
 from django.contrib.auth.views import LoginView
 from django.contrib import auth, messages
+from django.core.files.base import ContentFile
 from django.core.mail import send_mail, BadHeaderError, EmailMessage
-from django.utils.decorators import method_decorator
 from django.shortcuts import get_object_or_404, render, redirect
-
 from django.urls import reverse, reverse_lazy
 from django.views.generic import DetailView, FormView
 from django.views import View
@@ -18,6 +17,22 @@ from users.models import User, Profile
 from users.forms import UserEditForm, ProfileEditForm, UserLoginForm, UserRegisterForm, ResetTokenForm, ResetPasswordForm, SetNewPasswordForm
 from users.services import generate_token
 from users.tasks import send_email_to, clear_activation_key
+import requests
+
+
+def create_profile_and_add_avatar(backend, user: User, *args, **kwargs):
+    """
+    Створити профіль користувача для соціальної аутентифікації
+    """
+    response = kwargs['response']
+    profile, create = Profile.objects.get_or_create(user=user)
+
+    if backend.name == 'google-oauth2' and create:
+        if response['picture']:
+            url = response['picture']
+            response = requests.get(url)
+            profile.avatar.save(f'avatar_{user.username}.jpg', ContentFile(
+                response.content), save=True)
 
 
 class UserRegisterView(FormView):
@@ -55,8 +70,8 @@ class UserRegisterView(FormView):
             user.save()
             # clear_activation_key.apply_async((user.pk,), countdown=300)
 
-        messages.success(
-            self.request, 'На ваш email надіслано лист з посиланням для підтвердження акаунта')
+        messages.success(self.request,
+                         'На ваш email надіслано лист з посиланням для підтвердження акаунта')
         return super().form_valid(form)
 
     def form_invalid(self, form: UserRegisterForm):
@@ -92,7 +107,8 @@ class UserProfileView(LoginRequiredMixin, View):
     def post(self, request):
         form = UserEditForm(data=request.POST, instance=request.user)
         profile_form = ProfileEditForm(data=request.POST,
-                                       instance=request.user.profile, files=request.FILES)
+                                       instance=request.user.profile,
+                                       files=request.FILES)
 
         if form.is_valid() and profile_form.is_valid():
             form.save()
@@ -134,7 +150,7 @@ class UserRegisterConfirmView(View):
     def get(self, request: HttpRequest, token):
         try:
             user = User.objects.get(activation_key=token)
-            
+
         except User.DoesNotExist:
             messages.error(
                 request, 'Неправильний код активації або код застарів')
@@ -146,7 +162,7 @@ class UserRegisterConfirmView(View):
 
         image_path = f'images/users/{user.id}/avatar/{user.username}.png'
         create_random_image(MEDIA_ROOT / image_path)
-        
+
         user.is_active = True
         user.activation_key = None
         user.profile.avatar = image_path

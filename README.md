@@ -20,7 +20,8 @@ py -m pip install python-dotenv          # для змін середовв
 py -m pip install django-environ         # теж для змін середоввища в файлі .env
 py -m pip install django-debug-toolbar   # для дебага django
 py -m pip install django-jet-reboot      # для дебага django (old)
-py -m pip install django-allauth         # кастомна авторизація (google, github)
+py -m pip install social-auth-app-django # кастомна авторизація (google, github)
+py -m pip install django-allauth         # вся та кастомна авторизація (google, github)
 py -m pip install django-simple-captcha  # текстова капча
 py -m pip install django-recaptcha       # капча-кнопка google
 py -m pip install django-phonenumber-field # телефон (поле моделі)

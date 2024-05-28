@@ -30,6 +30,7 @@ class PostTopicAdmin(admin.ModelAdmin):
 @admin.register(Post)
 class PostAdmin(admin.ModelAdmin):
     prepopulated_fields = {'slug': ('title',)}
+    readonly_fields = ['total_likes', 'total_dislikes', 'total_saves']
     list_display = ['id', 'title', 'display_image', 'type', 'created_date']
     list_display_links = ['title']
     list_editable = ['type']
@@ -44,6 +45,7 @@ class PostAdmin(admin.ModelAdmin):
     fields = [
         ('user', 'type'),
         ('title', 'slug'),
+        ('total_likes', 'total_dislikes', 'total_saves'),
         'content',
         'meta_description',
         ('image', 'detail_image'),

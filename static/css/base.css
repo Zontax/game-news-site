@@ -45,3 +45,20 @@ footer {
     padding: 10px;
     margin-bottom: 10px;
 }
+
+div.social
+{
+    display: flex;
+    justify-content: center;
+    align-items: center;
+}
+
+.form-success {
+    color: green;
+    transition: all ease-in .2s;
+}
+
+.form-error {
+    color: red;
+    transition: all ease-in .2s;
+}

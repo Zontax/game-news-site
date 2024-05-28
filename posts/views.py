@@ -1,11 +1,14 @@
 from django.db.models import Count, Prefetch, Q
-from django.http import Http404, HttpRequest, HttpResponseForbidden
+from django.http import Http404, HttpRequest, HttpResponseForbidden, HttpResponse, JsonResponse
 from django.shortcuts import get_object_or_404, redirect, render
 from django.urls import reverse, reverse_lazy
 from django.contrib.auth.mixins import LoginRequiredMixin
 from django.contrib import messages
 from django.core.paginator import Paginator, EmptyPage, PageNotAnInteger
 from django.views.generic import View, ListView, DetailView, DeleteView
+from rest_framework.permissions import IsAuthenticated
+from rest_framework.response import Response
+from rest_framework.views import APIView
 
 from posts.forms import CreatePostCommentForm
 from posts.models import Post, PostType, PostTopic, PostTag, PostComment
@@ -203,12 +206,67 @@ class DeletePostCommentView(View):
 
         return redirect(reverse('posts:detail', args=[comment.post.slug]) + '#comments')
 
-# import os
-# from urllib.parse import urljoin
-# from django.conf import settings
-# from django.core.files.storage import FileSystemStorage
-# class Ckeditor5Storage(FileSystemStorage):
-#     """Custom storage for django_ckeditor_5 images."""
 
-#     location = os.path.join(MEDIA_ROOT, "django_ckeditor_5")
-#     base_url = urljoin(MEDIA_URL, "django_ckeditor_5/")
+class PostLikeAPIView(APIView):
+    """
+    API endpoint для додавання користувачем лайків на публікацію.
+    """
+    permission_classes = [IsAuthenticated]
+
+    def get(self, request: HttpRequest, post_id):
+        post = get_object_or_404(Post, id=post_id)
+        user = request.user
+
+        if post.likes.filter(id=user.id).exists():
+            post.likes.remove(user)
+            data = f'<i class="bi bi-plus-square"></i> {post.likes.count()}'
+        else:
+            post.likes.add(user)
+            if post.dislikes.filter(id=user.id).exists():
+                post.dislikes.remove(user)
+            data = f'<i class="bi bi-plus-square-fill"></i> {post.likes.count()}'
+
+        return HttpResponse(data)
+
+
+class PostDislikeAPIView(APIView):
+    """
+    API endpoint для додавання користувачем дизлайків на публікацію.
+    """
+    permission_classes = [IsAuthenticated]
+
+    def get(self, request: HttpRequest, post_id):
+        post = get_object_or_404(Post, id=post_id)
+        user = request.user
+
+        if post.dislikes.filter(id=user.id).exists():
+            post.dislikes.remove(user)
+            data = f'<i class="bi bi-dash-square"></i> {post.dislikes.count()}'
+        else:
+            post.dislikes.add(user)
+            if post.likes.filter(id=user.id).exists():
+                post.likes.remove(user)
+            data = f'<i class="bi bi-dash-square-fill"></i> {post.dislikes.count()}'
+
+        return HttpResponse(data)
+
+
+
+class PostSaveAPIView(APIView):
+    """
+    API endpoint для додання публікаціїї у "збережені" користувачів.
+    """
+    permission_classes = [IsAuthenticated]
+
+    def get(self, request: HttpRequest, post_id):
+        post = get_object_or_404(Post, id=post_id)
+        user = request.user
+
+        if post.saves.filter(id=user.id).exists():
+            post.saves.remove(user)
+            data = f'<i class="bi bi-bookmark"></i> {post.saves.count()}'
+        else:
+            post.saves.add(user)
+            data = f'<i class="bi bi-bookmark-check-fill"></i> {post.saves.count()}'
+
+        return HttpResponse(data)

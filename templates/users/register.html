@@ -54,33 +54,49 @@
                                     name="last_name"
                                     placeholder="Введіть ваше прізвище">
                                 {% if form.last_name.errors %}
-                                    <div class="alert alert-danger alert-dismissible fade show">{{ form.last_name.errors }}</div>
+                                    <div class="alert alert-danger alert-dismissible fade show">
+                                        {{ form.last_name.errors }}
+                                    </div>
                                 {% endif %}
                             </div>
 
                         <div class="form-floating mt-3 mr-3">
                             <label for="id_username" class="form-label">Ім'я користувача*</label>
                             <input type="text" class="form-control"
+                                hx-get="/api/users/check_username/" 
+                                hx-trigger="keyup changed" 
+                                hx-swap="outerhtml"
+                                hx-target="#check-username" 
                                 value="{{ form.username.value|default:'' }}" 
                                 id="id_username"
                                 name="username"
                                 placeholder="Введіть ваше ім'я користувача" 
                                 required>
+                            <div id="check-username" class="mt-1"></div>
                             {% if form.username.errors %}
-                                <div class="alert alert-danger alert-dismissible fade show">{{ form.username.errors }}</div>
+                                <div class="alert alert-danger alert-dismissible fade show">
+                                    {{ form.username.errors }}
+                                </div>
                             {% endif %}
                         </div>
 
                         <div class="form-floating mt-3">
                             <label for="id_email" class="form-label">Email*</label>
                             <input type="email" class="form-control"
+                                hx-get="/api/users/check_email/" 
+                                hx-trigger="keyup changed delay:300ms" 
+                                hx-swap="outerhtml"
+                                hx-target="#check-email" 
                                 value="{{ form.email.value|default:'' }}" 
                                 id="id_email"
                                 name="email"
                                 placeholder="Введіть ваш email" 
                                 required>
+                            <div id="check-email" class="mt-1"></div>
                             {% if form.email.errors %}
-                                <div class="alert alert-danger alert-dismissible fade show">{{ form.email.errors }}</div>
+                                <div class="alert alert-danger alert-dismissible fade show">
+                                    {{ form.email.errors }}
+                                </div>
                             {% endif %}
                         </div>
 
@@ -93,7 +109,9 @@
                                 placeholder="Введіть пароль" 
                                 required>
                             {% if form.password1.errors %}
-                                <div class="alert alert-danger alert-dismissible fade show">{{ form.password1.errors }}</div>
+                                <div class="alert alert-danger alert-dismissible fade show">
+                                    {{ form.password1.errors }}
+                                </div>
                             {% endif %}
                         </div>
 
@@ -106,14 +124,18 @@
                                 placeholder="Підтвердіть пароль" 
                                 required>
                             {% if form.password2.errors %}
-                                <div class="alert alert-danger alert-dismissible fade show">{{ form.password2.errors }}</div>
+                                <div class="alert alert-danger alert-dismissible fade show">
+                                    {{ form.password2.errors }}
+                                </div>
                             {% endif %}
                         </div>
                         
                         <div class="form-floating mt-3">
                             {{ form.captcha }}
                             {% if form.captcha.errors %}
-                                <div class="alert alert-danger alert-dismissible fade show">{{ form.captcha.errors }}</div>
+                                <div class="alert alert-danger alert-dismissible fade show">
+                                    {{ form.captcha.errors }}
+                                </div>
                             {% endif %}
                         </div>
                     </div>
@@ -121,9 +143,21 @@
                     {% if request.GET.next %}
                         <input type="hidden" name="next" value="{{ request.GET.next }}">
                     {% endif %}
-                    <button class="w-100 btn btn-lg btn-primary mt-3" type="submit">Зареєструватися</button>
+                    <button class="w-100 btn btn-lg btn-primary mt-2" type="submit">Зареєструватися</button>
                 </form>
-                <div class="mt-3">
+
+                <div class="social mt-1">
+                    <a class="btn btn-danger rounded-0 m-1" 
+                        href="{% url 'social:begin' 'google-oauth2' %}">
+                        <i class="bi bi-google"></i> Google
+                    </a>
+                    <a class="btn btn-dark rounded-0 m-1" 
+                        href="{% url 'social:begin' 'github' %}">
+                        <i class="bi bi-github"></i> Github
+                    </a>
+                </div>
+
+                <div class="forgot-password mt-2">
                     <a href="{% url 'user:reset_wait' %}" class="dark">Активувати існуючий акаунт</a> |
                     <a href="{% url 'user:password_reset' %}" class="dark">Забули пароль?</a>
                 </div>

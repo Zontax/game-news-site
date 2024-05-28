@@ -17,7 +17,7 @@ urlpatterns = [
     path('sitemap.xml', sitemap, {'sitemaps': {'posts': PostSitemap}},
          name='django.contrib.sitemaps.views.sitemap'),
     # URLS
-    path('accounts/', include('allauth.urls')),
+    path('social-auth/', include('social_django.urls', namespace='social')),
     path('admin/filebrowser/', site.urls),
     path('admin/', admin.site.urls),
     path('', include('main.urls', namespace='main')),
@@ -30,5 +30,7 @@ if settings.DEBUG:
     urlpatterns += [
         path('__debug__/', include('debug_toolbar.urls')),
     ]
-    urlpatterns += static(settings.STATIC_URL, document_root=settings.STATIC_ROOT) 
-    urlpatterns += static(settings.MEDIA_URL, document_root=settings.MEDIA_ROOT)
+    urlpatterns += static(settings.STATIC_URL,
+                          document_root=settings.STATIC_ROOT)
+    urlpatterns += static(settings.MEDIA_URL,
+                          document_root=settings.MEDIA_ROOT)

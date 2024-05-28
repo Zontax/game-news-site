@@ -141,22 +141,22 @@
             </div>
 
             <div class="post-buttons m-2">
-                <text class="post-likes mr-3" title="Подобається"
-                    hx-get="/api/post-like/{{ post.pk }}" 
+                <text class="post-likes ml-5 mr-3" title="Плюс"
+                    hx-get="/posts/like/{{ post.pk }}" 
                     hx-trigger="click"
                     hx-target=".post-likes">
                     {% csrf_token %}
-                    ➕ {{ post.likes.count }}
+                    <i class="bi bi-plus-square"></i> {{ post.likes.count }}
                 </text>
-                <text class="post-dislikes mr-3" title="Не подобається"
-                    hx-get="/api/post-dislike/{{ post.pk }}" 
+                <text class="post-dislikes mr-3" title="Мінус"
+                    hx-get="/posts/dislike/{{ post.pk }}" 
                     hx-trigger="click"
                     hx-target=".post-dislikes">
                     {% csrf_token %}
-                    ➖ {{ post.dislikes.count }}
+                    <i class="bi bi-dash-square"></i> {{ post.dislikes.count }}
                 </text>
                 <text class="post-saves btn btn-dark" title="В закладки"
-                    hx-get="/api/post-save/{{ post.pk }}" 
+                    hx-get="/posts/save/{{ post.pk }}" 
                     hx-trigger="click"
                     hx-target=".post-saves">
                     {% csrf_token %}
@@ -197,7 +197,7 @@
             {% endif %}
         </div>
     </div>
-
+    
     {% include 'posts/_comment_tree.html' with comments=post.comments.all %}
 </div>
 

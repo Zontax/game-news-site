@@ -2,7 +2,7 @@ from django.urls import path
 
 from posts.feeds import LatestPostsFeed
 from posts.views import PostListView, PostDetailView, SavedPostListView, RandomPostsView, DeletePostView, DeletePostCommentView
-
+from posts.views import PostDislikeAPIView, PostLikeAPIView, PostSaveAPIView
 app_name = 'posts'
 
 urlpatterns = [
@@ -18,4 +18,11 @@ urlpatterns = [
     path('delete/<slug:post_slug>/', DeletePostView.as_view(), name='delete'),
     path('comments/delete/<int:id>/', DeletePostCommentView.as_view(),
          name='comment_delete'),
+
+    path('like/<int:post_id>/', PostLikeAPIView.as_view(), 
+         name='post_like'),
+    path('dislike/<int:post_id>/', PostDislikeAPIView.as_view(), 
+         name='post_dislike'),
+    path('save/<int:post_id>/', PostSaveAPIView.as_view(), 
+         name='post_like'),
 ]

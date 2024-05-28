@@ -24,6 +24,30 @@
         <h2 class="text-white">Пошукові дані</h2>
     </div>
 
+    <div class="mt-3 bg-light" 
+        hx-get="/api/datetime" 
+        hx-trigger="click[ctrlKey]">
+        Ctrl + LeftClick Me
+    </div>
+
+    <div class="mt-3 bg-light" 
+        hx-get="/api/datetime/seconds/" 
+        hx-trigger="every 1s"
+        hx-target=".sec">
+        Секунди: <a class="sec"></a>
+    </div>
+
+    <div class="mt-3">
+        <label>Перевірити ім'я користувача</label>
+        <input hx-get="/api/users/check_username/" 
+            hx-trigger="keyup changed" 
+            hx-target="#check-username" 
+            name="username"
+            class="form-control mr-sm-2" 
+            type="text" 
+            placeholder="Перевірити username">
+        <div id="check-username" class="mt-2"></div>
+    </div>
 </div>
 
 {% endblock %}

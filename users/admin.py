@@ -4,16 +4,24 @@ from django.contrib import admin
 from users.models import User, Profile
 
 
+class ProfileInline(admin.StackedInline):
+    model = Profile
+    can_delete = False
+    verbose_name_plural = 'Профілі'
+
+
 @admin.register(User)
 class UserAdmin(admin.ModelAdmin):
+    inlines = [ProfileInline]
     list_display = ['id', 'username', 'display_avatar', 'is_active', 'first_name', 'last_name',
                     'email', 'is_superuser', 'date_joined']
     list_display_links = ['username']
+    filter_horizontal = ['groups', 'user_permissions']
     search_fields = ['username', 'first_name',
                      'last_name', 'email']
     list_filter = ['date_joined', 'last_login']
-    readonly_fields = ['username', 'email', 'password', 'date_joined', 
-                       'last_login', 'is_superuser']
+    readonly_fields = ['username', 'email', 'password',
+                       'date_joined', 'last_login', 'is_superuser']
     list_per_page = 20
 
     fields = [
@@ -21,8 +29,11 @@ class UserAdmin(admin.ModelAdmin):
         ('first_name', 'last_name'),
         'email',
         'date_joined',
+        ('is_active', 'is_staff', 'is_superuser'),
+        'groups',
+        'user_permissions',
     ]
-    
+
     def display_avatar(self, obj: User):
         if obj.profile.avatar and obj.profile.avatar.url:
             return format_html(
@@ -50,7 +61,7 @@ class ProfileAdmin(admin.ModelAdmin):
         ('phone_number', 'date_of_birth'),
         ('avatar', 'profile_bg')
     ]
-    
+
     def display_avatar(self, obj: Profile):
         if obj.avatar and obj.avatar.url:
             return format_html(

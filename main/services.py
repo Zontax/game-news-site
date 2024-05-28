@@ -1,9 +1,8 @@
 from random import randint
 from PIL import Image, ImageDraw
-from app.settings import MEDIA_ROOT
 
 
-def create_random_image(full_path=MEDIA_ROOT / 'images/random/random.png'):
+def create_random_image(full_path):
     try:
         color = (randint(0, 255),
                  randint(0, 255),

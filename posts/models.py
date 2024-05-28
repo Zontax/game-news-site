@@ -4,6 +4,7 @@ from django.db.models import SET_NULL, CASCADE
 from django.utils.timezone import now
 from django.dispatch import receiver
 from django.urls import reverse
+from django.contrib import admin
 
 from app.settings import MEDIA_ROOT
 from users.models import User
@@ -120,16 +121,16 @@ class Post(Model):
     edit_date = DateTimeField('Дата редагування', auto_now=True,
                               blank=True, null=True)
     likes = ManyToManyField(User, related_name='liked_posts',
-                            blank=True, verbose_name='➕ Плюси')
+                            blank=True, verbose_name='Плюси')
     dislikes = ManyToManyField(User, related_name='disliked_posts',
-                               blank=True, verbose_name='➖ Мінуси')
+                               blank=True, verbose_name='Мінуси')
     saves = ManyToManyField(User, related_name='saved_posts',
                             blank=True, verbose_name='В збережених')
-    review_pluses = CharField('Плюси', max_length=1000,
+    review_pluses = CharField('Огляд (Плюси)', max_length=1000,
                               blank=True, null=True)
-    review_minuses = CharField('Мінуси', max_length=1000,
+    review_minuses = CharField('Огляд (Мінуси)', max_length=1000,
                                blank=True, null=True)
-    review_rating = PositiveSmallIntegerField('Рейтинг огляду',
+    review_rating = PositiveSmallIntegerField('Огляд (Рейтинг)',
                                               blank=True, null=True)
 
     objects = Manager()
@@ -148,8 +149,17 @@ class Post(Model):
     def get_absolute_url(self):
         return reverse('posts:detail', args=[self.slug])
 
+    @admin.display(description='Плюси')
     def total_likes(self):
         return self.likes.count()
+
+    @admin.display(description='Мінуси')
+    def total_dislikes(self):
+        return self.dislikes.count()
+    
+    @admin.display(description='В збережених')
+    def total_saves(self):
+        return self.saves.count()
 
 
 class PostCommentActiveManager(Manager):
@@ -176,6 +186,10 @@ class PostComment(Model):
     created_date = DateTimeField('Дата', auto_now_add=True)
     edit_date = DateTimeField('Дата редагування', auto_now=True,
                               blank=True, null=True)
+    likes = ManyToManyField(User, related_name='liked_comments',
+                            blank=True, verbose_name='Плюси')
+    dislikes = ManyToManyField(User, related_name='disliked_comments',
+                               blank=True, verbose_name='Мінуси')
     is_active = BooleanField('Активний', default=True)
 
     objects = Manager()
@@ -193,6 +207,14 @@ class PostComment(Model):
 
     def get_absolute_url(self):
         return f"{reverse('posts:detail', args=[self.post.slug])}#comment-{self.id}"
+
+    @admin.display(description='Плюси')
+    def total_likes(self):
+        return self.likes.count()
+
+    @admin.display(description='Мінуси')
+    def total_dislikes(self):
+        return self.dislikes.count()
 
 
 @receiver(pre_delete, sender=Post)
@@ -240,4 +262,3 @@ def create_default_post_type_and_topic(sender, **kwargs):
 
 #     class Meta:
 #         db_table = 'posts_tags'
-

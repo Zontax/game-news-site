@@ -21,9 +21,9 @@ def post_search(query: str):
     """
     Повнотекстовий пошук
     """
-    search_vector = SearchVector('title', weight='A') + \
-        SearchVector('content', weight='B')
-    search_query = SearchQuery(query)
+    # search_vector = SearchVector('title', weight='A') + \
+    #     SearchVector('content', weight='B')
+    # search_query = SearchQuery(query)
 
     # results = (Post.published
     #            .annotate(
@@ -34,8 +34,7 @@ def post_search(query: str):
 
     results = (Post.published
                .annotate(similarity_title=TrigramSimilarity('title', query),
-                         similarity_content=TrigramSimilarity('content', query)
-                         )
+                         similarity_content=TrigramSimilarity('content', query))
                .filter(Q(similarity_title__gt=0.05) | Q(similarity_content__gt=0.05))
                .order_by('-similarity_title', '-similarity_content'))
 
