@@ -102,7 +102,7 @@
 
             <form class="form-inline mt-2 mt-md-0" role="search" action="{% url 'posts:search' %}" method="GET">
                 <input 
-                    value="{{ query|default:'' }}"
+                    value="{{ request.GET.q }}"
                     name="q"
                     class="form-control mr-sm-2" 
                     type="text" 

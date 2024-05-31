@@ -1,10 +1,6 @@
 {% extends 'base.html' %}
 {% load static humanize main_tags %}
 
-{% block css %}
-    <link rel="stylesheet" href="{% static 'css/fix_footer.css' %}" />
-{% endblock %}
-
 {% block content %}
 
 <div class="container">
@@ -19,7 +15,7 @@
                 <div class="card mb-4 custom-shadow">
                     <div class="row">
                         <div class="col-md-4">
-                            <img src="{% if detail_user.profile.avatar %}{{ detail_user.profile.avatar.url }}{% else %}
+                            <img class="rounded-circle" src="{% if detail_user.profile.avatar %}{{ detail_user.profile.avatar.url }}{% else %}
                             
                             {% static 'images/baseavatar.jpg' %}{% endif %}"
                                 class="img-thumbnail rounded-0"

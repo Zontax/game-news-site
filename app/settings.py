@@ -60,7 +60,7 @@ MIDDLEWARE = [
     # Apps
     'main.middleware.PrintRequestInfoMiddleware',
     # Installs
-    #'debug_toolbar.middleware.DebugToolbarMiddleware',
+    'debug_toolbar.middleware.DebugToolbarMiddleware',
 ]
 
 ROOT_URLCONF = 'app.urls'

@@ -30,21 +30,23 @@
 </head>
 
 <body>
-    {% include '_header.html' %}
-    
-    {% block advertisement %}
-    {% endblock %}
-    
-    {% include '_notifications.html' %}
+    <div class="wrapper">
+        {% include '_header.html' %}
 
-    <main class="main">
-        <div class="container">
-            {% block content %}
+        <main class="main">
+            {% block advertisement %}
             {% endblock %}
-        </div>
-    </main>
+            
+            {% include '_notifications.html' %}
 
-    {% include '_footer.html' %}
+            <div class="container">
+                {% block content %}
+                {% endblock %}
+            </div>
+        </main>
+
+        {% include '_footer.html' %}
+    </div>
 
     <script src="{% static 'js/bootstrap.min.js' %}"></script>
     <script src="{% static 'js/bootstrap.bundle.min.js' %}"></script>

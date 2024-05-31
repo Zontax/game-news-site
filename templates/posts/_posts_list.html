@@ -3,7 +3,9 @@
 {% for post in posts %}
     {% include 'posts/_post_card.html' %}
 {% empty %}
-    <div class=" bg-white p-4 mb-4 mx-2 rounded custom-shadow">
-        <h5>Таких публікацій не знайдено</h5>
-    </div>
+    {% if not request.GET.q %}
+        <div class=" bg-white p-4 mb-4 mx-2 rounded custom-shadow">
+            <h5>Таких публікацій не знайдено</h5>
+        </div>
+    {% endif %}
 {% endfor %}

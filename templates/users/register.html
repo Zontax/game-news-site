@@ -5,10 +5,6 @@
     <title>Реєстрація - {{ site_main_title }}</title>
 {% endblock %}
 
-{% block css %}
-    <link rel="stylesheet" href="{% static 'css/fix_footer.css' %}" />
-{% endblock %}
-
 {% block content %}
 
 <div class="row mt-5">
@@ -158,7 +154,7 @@
                 </div>
 
                 <div class="forgot-password mt-2">
-                    <a href="{% url 'user:reset_wait' %}" class="dark">Активувати існуючий акаунт</a> |
+                    <a href="{% url 'user:reset_wait' %}" class="dark">Активувати створений акаунт</a> |
                     <a href="{% url 'user:password_reset' %}" class="dark">Забули пароль?</a>
                 </div>
             </div>

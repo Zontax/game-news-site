@@ -15,7 +15,7 @@ from posts.services import post_search
 
 from mimesis import Person, Text, Datetime
 from mimesis.builtins import UkraineSpecProvider
-from datetime import timedelta
+from datetime import datetime, timedelta
 from random import randint
 from pytils.translit import slugify
 
@@ -172,11 +172,12 @@ class FakePostCreateAPIView(APIView):
     """
     permission_classes = [IsAdminUser]
 
-    def get(self, request: HttpRequest, count=5):
+    def get(self, request: HttpRequest, count=2):
         try:
             for i in range(count):
                 uid = uuid.uuid4().hex
-                date = timezone.now()
+                date = datetime.now()
+                year = date.year
                 month = date.month
                 day = date.day
 
@@ -185,9 +186,9 @@ class FakePostCreateAPIView(APIView):
                 if month < 10:
                     month = f'0{month}'
 
-                image_path = f'images/posts/{date.year}/{month}/{day}/{uid}.png'
+                image_path = f'images/posts/{year}/{month}/{day}/{uid}.png'
                 create_random_image(MEDIA_ROOT / image_path)
-                print(image_path)
+                print(MEDIA_ROOT / image_path)
 
                 title = f'{text.title()[:80]} {uid}'[:130]
                 slug = slugify(f'{uid}')[:130]

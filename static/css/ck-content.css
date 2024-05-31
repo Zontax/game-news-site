@@ -30,3 +30,7 @@ figure.media {
     width: auto;
     height: 130%;
 }
+
+.ck-editor__editable_inline  {
+    min-height: 120px !important;
+}

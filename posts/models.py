@@ -126,11 +126,11 @@ class Post(Model):
                                blank=True, verbose_name='Мінуси')
     saves = ManyToManyField(User, related_name='saved_posts',
                             blank=True, verbose_name='В збережених')
-    review_pluses = CharField('Огляд (Плюси)', max_length=1000,
+    review_pluses = CharField('Плюси (Огляд)', max_length=1000,
                               blank=True, null=True)
-    review_minuses = CharField('Огляд (Мінуси)', max_length=1000,
+    review_minuses = CharField('Мінуси (Огляд)', max_length=1000,
                                blank=True, null=True)
-    review_rating = PositiveSmallIntegerField('Огляд (Рейтинг)',
+    review_rating = PositiveSmallIntegerField('Рейтинг (Огляд)',
                                               blank=True, null=True)
 
     objects = Manager()

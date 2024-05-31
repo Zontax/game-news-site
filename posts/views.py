@@ -10,10 +10,11 @@ from rest_framework.permissions import IsAuthenticated
 from rest_framework.response import Response
 from rest_framework.views import APIView
 
+from app.settings import POSTS_IN_PAGE
+from users.models import User
 from posts.forms import CreatePostCommentForm
 from posts.models import Post, PostType, PostTopic, PostTag, PostComment
 from posts.services import post_search
-from app.settings import POSTS_IN_PAGE, CKEDITOR_5_CONFIGS
 import logging
 
 logger = logging.getLogger(__name__)
@@ -23,7 +24,7 @@ class PostListView(View):
 
     def get(self, request: HttpRequest, type_slug=None, tag_slug=None, topic_slug=None):
         page = request.GET.get('page', 1)
-        query = request.GET.get('q', '')
+        search_query = request.GET.get('q', '')
         topic_param = request.GET.get('topic', None)
         type = None
         topic = None
@@ -35,10 +36,10 @@ class PostListView(View):
         elif topic_slug:
             posts = Post.published.filter(topics__slug=topic_slug)
             topic = PostTopic.objects.get(slug=topic_slug)
-        elif (type_slug == None and query == ''):
+        elif (type_slug == None and search_query == ''):
             posts = Post.published.all()
-        elif query:
-            posts = post_search(query)
+        elif search_query:
+            posts = post_search(search_query)
         else:
             type = get_object_or_404(PostType, slug=type_slug)
             if topic_param:
@@ -69,7 +70,6 @@ class PostListView(View):
             'slug_url': type_slug,
             'topic': topic,
             'tag': tag,
-            'query': query,
         }
         return render(request, 'posts/index.html', context)
 
@@ -110,26 +110,24 @@ class PostDetailView(DetailView):
         return redirect(post)
 
     def get_context_data(self, **kwargs):
-
-        latest_posts = (Post.published
-                        .filter(type=self.object.type)[:5]
-                        .select_related('type', 'user')
-                        .annotate(comment_count=Count('comments',
-                                                      Q(comments__is_active=True)))
-                        )
-
+        context = super().get_context_data(**kwargs)
         post: Post = self.get_object(self.queryset)
+
         post_tags_ids = post.tags.values_list('id', flat=True)
         similar_posts = (Post.published
                          .filter(tags__in=post_tags_ids)
-                         .exclude(id=post.id).annotate(same_tags=Count('tags'))
-                         .order_by('-same_tags')[:4]
+                         .exclude(id=post.id)
+                         .annotate(same_tags=Count('tags'))
+                         .order_by('-same_tags')[:5]
                          )
-        context = super().get_context_data(**kwargs)
+        latest_posts = (Post.published
+                        .filter(type=self.object.type)[:5]
+                        .select_related('type', 'user')
+                        .annotate(comment_count=Count('comments', Q(comments__is_active=True)))
+                        )
         context['title'] = self.object.title
         context['latest_posts'] = latest_posts
         context['similar_posts'] = similar_posts
-        context['ckeditor_comments_config'] = CKEDITOR_5_CONFIGS['comments']
         context['form'] = CreatePostCommentForm()
         return context
 
@@ -138,10 +136,8 @@ class SavedPostListView(LoginRequiredMixin, View):
 
     def get(self, request: HttpRequest):
         page = request.GET.get('page', 1)
-        user_id = request.user.id
-
         posts = (Post.published
-                 .filter(saves=user_id)
+                 .filter(saves=request.user.id)
                  .select_related('type', 'user')
                  .annotate(comment_count=Count('comments'))
                  )
@@ -178,12 +174,11 @@ class DeletePostView(View):
             return HttpResponseForbidden('Ви не увійшли в систему')
 
         try:
-            post = Post.objects.get(slug=post_slug)
-
+            Post.objects.get(slug=post_slug).delete()
         except Post.DoesNotExist:
-            return Http404('Публікацію не знайдено. Схоже, що вона вже видалена.')
+            raise Http404('Публікацію не знайдено. Схоже, що вона вже видалена.')
 
-        post.delete()
+        
         messages.success(request, f'Публікацію ({post_slug}) видалено')
 
         return redirect(reverse('main:index'))
@@ -249,7 +244,6 @@ class PostDislikeAPIView(APIView):
             data = f'<i class="bi bi-dash-square-fill"></i> {post.dislikes.count()}'
 
         return HttpResponse(data)
-
 
 
 class PostSaveAPIView(APIView):

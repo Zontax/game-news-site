@@ -19,13 +19,15 @@
             </p>
 
             <p class="d-inline-block mb-2">
-                Автор: 
-                <b>{% if post.user %}
+                    
+                {% if post.user %} 
+                    Автор:
                     <a href="{% url 'user:detail' post.user.username %}" title="{{ post.user.username }}">
-                        {{ post.user.get_full_name|default:post.user.username }}</a>
+                        <b>{{ post.user.get_full_name|default:post.user.username }}</b>
+                    </a>
                 {% else %}
-                    [невідомо]
-                {% endif %}</b> <i class="text-secondary">{{ post.created_date }}</i>
+                    <b>Gaming Ua</b>
+                {% endif %} <i class="text-secondary">{{ post.created_date }}</i>
 
                 {% if user.is_staff %}
                     <a href="{% url 'posts:delete' post.slug %}" 

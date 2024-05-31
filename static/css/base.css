@@ -2,8 +2,8 @@
     outline: 1px solid rgb(219, 219, 219) !important;
 } */
 
-body {
-    /* background-image: url('../images/bg-image.jpg'); */
+html, body {
+    background-image: url('../images/background.png');
     background-color: rgb(185, 185, 185);
     background-repeat: no-repeat;
     background-attachment: fixed;
@@ -12,12 +12,27 @@ body {
     height: 100%;
 }
 
+body div.wrapper {
+    display: flex;
+    flex-direction: column;
+    min-height: 100%;
+}
+
+main.main
+{   
+    margin-top: 56px;
+    flex: 1 1 auto;
+}
+
+.notifications-container 
+{   
+    top: 56px;
+}
+
 div.advertisement {
     display: flex;
     justify-content: center;
     align-items: center;
-    max-width: 101.1%;
-    top: 56px;
     padding-top: 5px;
     background-color: rgb(222, 208, 19);
 }
@@ -30,13 +45,13 @@ footer {
     background-color: aliceblue;
 }
 
-/* main div.container {
+main {
+    min-height: 100%;
+}
+
+/* .post-content {
     margin-top: 56px;
 } */
-
-.post-content {
-    margin-top: 56px;
-}
 
 .captcha {
     background-color: #f2f2f2;
@@ -62,3 +77,4 @@ div.social
     color: red;
     transition: all ease-in .2s;
 }
+

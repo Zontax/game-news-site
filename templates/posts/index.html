@@ -9,16 +9,13 @@
 
 <div class="row bg-white">
     <!-- Search results -->
-    <div class="post-content col-md-9 mt-1">
+    <div class="query col-md-9">
         {% if request.GET.q %}
-            <div class=" bg-white p-4 mb-4 mx-2 mt-5 rounded custom-shadow">
+            <div class="p-4 mb-4">
                 {% if posts %}
                     <h2 class="mt-4">Результати пошуку <b>{{ request.GET.q }}</b></h2>
                 {% else %}
                     <h2 class="mt-4">За запитом <b>{{ request.GET.q }}</b> нічого не знайдено</h2>
-                    {% block css %}
-                        <link rel="stylesheet" href="{% static 'css/fix_footer.css' %}" />
-                    {% endblock %}
                 {% endif %}
             </div>
         {% endif %}
@@ -27,8 +24,9 @@
     <div class="post-content col-md-9 mt-2">
         <!-- Type & Topic -->
         {% if type %}
-            <h2 class="mt-2 text-center">{{ type.name }}
-                {% if topic %}: <a href="{{ topic.get_absolute_url }}">{{ topic.name }}</a>
+            <h2 class="mt-2 text-center">{{ type.name }}:
+                {% if topic %} 
+                    <a href="{{ topic.get_absolute_url }}">{{ topic.name }}</a>
                 {% endif %}
             </h2>
         <!-- Topic -->
@@ -49,6 +47,14 @@
                 <h4>Рубрики</h4>
                 {% for topic in topics %}
                     <a href="{% url 'posts:type' slug_url %}?topic={{ topic.slug }}" 
+                        class="topic-button btn btn-dark d-block mb-2">
+                        {{ topic.name }}
+                    </a>
+                {% endfor %}
+            {% elif tag or topic %}
+                <h4>Рубрики</h4>
+                {% for topic in topics %}
+                    <a href="{{ topic.get_absolute_url }}"
                         class="topic-button btn btn-dark d-block mb-2">
                         {{ topic.name }}
                     </a>

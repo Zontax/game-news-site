@@ -1,6 +1,6 @@
 {% load static cache main_tags %}
 
-{% cache 60 advertisement %}
+{% cache 5 advertisement %}
     {% for advertisement in advertisements %}
         <div class="advertisement" style="{{ advertisement.css_style|bleach_xss|safe }}"> 
             {% if user.is_staff %}
