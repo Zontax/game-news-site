@@ -63,7 +63,6 @@ class PostListView(View):
             posts = paginator.page(paginator.num_pages)
 
         context = {
-            'title': 'Каталог',
             'posts': posts,
             'type': type,
             'topics': topics,
@@ -71,6 +70,8 @@ class PostListView(View):
             'topic': topic,
             'tag': tag,
         }
+        if type:
+            context['title'] = type.name
         return render(request, 'posts/index.html', context)
 
 
@@ -145,7 +146,7 @@ class SavedPostListView(LoginRequiredMixin, View):
         posts_in_page = paginator.page(int(page))
 
         context = {
-            'title': 'Каталог',
+            'title': 'Збережені',
             'posts': posts_in_page,
         }
         return render(request, 'posts/saved_posts.html', context)
@@ -214,12 +215,12 @@ class PostLikeAPIView(APIView):
 
         if post.likes.filter(id=user.id).exists():
             post.likes.remove(user)
-            data = f'<i class="bi bi-plus-square"></i> {post.likes.count()}'
+            data = f'<block title="Поставити лайк"><i class="bi bi-plus-square"></i> Лайк {post.likes.count()}</block>'
         else:
             post.likes.add(user)
             if post.dislikes.filter(id=user.id).exists():
                 post.dislikes.remove(user)
-            data = f'<i class="bi bi-plus-square-fill"></i> {post.likes.count()}'
+            data = f'<block title="Зняти лайк"><i class="bi bi-plus-square-fill"></i> Лайк {post.likes.count()}</block>'
 
         return HttpResponse(data)
 
@@ -236,12 +237,12 @@ class PostDislikeAPIView(APIView):
 
         if post.dislikes.filter(id=user.id).exists():
             post.dislikes.remove(user)
-            data = f'<i class="bi bi-dash-square"></i> {post.dislikes.count()}'
+            data = f'<block title="Поставити дизлайк"><i class="bi bi-dash-square"></i> {post.dislikes.count()} Дизлайк</block>'
         else:
             post.dislikes.add(user)
             if post.likes.filter(id=user.id).exists():
                 post.likes.remove(user)
-            data = f'<i class="bi bi-dash-square-fill"></i> {post.dislikes.count()}'
+            data = f'<block title="Зняти дизлайк"><i class="bi bi-dash-square-fill"></i> {post.dislikes.count()} Дизлайк</block>'
 
         return HttpResponse(data)
 
@@ -258,9 +259,9 @@ class PostSaveAPIView(APIView):
 
         if post.saves.filter(id=user.id).exists():
             post.saves.remove(user)
-            data = f'<i class="bi bi-bookmark"></i> {post.saves.count()}'
+            data = f'<block title="Додати в збережені"><i class="bi bi-bookmark"></i></block>'
         else:
             post.saves.add(user)
-            data = f'<i class="bi bi-bookmark-check-fill"></i> {post.saves.count()}'
+            data = f'<block title="Вилучити зі збережених"><i class="bi bi-bookmark-check-fill"></i></block>'
 
         return HttpResponse(data)

@@ -27,7 +27,7 @@
                                 <b>{{ post.user.get_full_name }}</b>
                             </a>
                         {% else %}
-                            <b>Gaming Ua</b>
+                            <b>{{ site_main_title }}</b>
                         {% endif %}
                         
                         <a href="{% url 'posts:type' post.type.slug %}"
@@ -42,7 +42,7 @@
                         </a>
                     </p>
                     <p class="text-secondary">
-                        {{ post.created_date }}
+                        {{ post.created_date|naturalday }}
                         {% if user.is_staff %}
                             <a href="{% url 'posts:delete' post.slug %}" 
                                 class="btn btn-danger float-right"
@@ -55,7 +55,7 @@
                             </a>
                         {% endif %}
                         
-                        <o class="float-right mr-3">
+                        <i class="float-right mr-3">
                             <i class="bi bi-share-fill"></i>
                             Поділитися: 
                             <a href="https://www.facebook.com/share.php?u={{ request.build_absolute_uri }}">
@@ -63,7 +63,7 @@
     
                             <a href="https://x.com/intent/post?url={{ request.build_absolute_uri }}&text={{ post.title }}">
                                 <i class="bi bi-twitter"></i></a>
-                        </o>
+                        </i>
                     </p>
                 </div>
                 
@@ -83,19 +83,19 @@
                     style="background: {{ post.review_rating|rating_to_color }}; 
                     {% if user_agent.is_mobile %}font-size: 40px;{% endif %}">
                     {{ post.review_rating }}
-                    <text class="ml-5">
+                    <div class="ml-5">
                         {{ post.review_rating|rating_to_text }}
-                    </text>
+                    </div>
                 </div>
-                <div class="review row mt-3">
+                <div class="review row mt-2">
                     <div class="review-pluses col-md-6 text-right">
-                        <text>Вдалося</text>
+                        <h5>Вдалося</h5>
                         <p>
                             <i>{{ post.review_pluses|linebreaks }}</i>
                         </p>
                     </div>
                     <div class="review-minuses col-md-6 text-left">
-                        <text>Не вдалося</text>
+                        <h5>Не вдалося</h5>
                         <p>
                             <i>{{ post.review_minuses|linebreaks }}</i>
                         </p>
@@ -142,32 +142,42 @@
             </div>
             <div class="post-buttons m-2">
                 {% with users_like=post.likes.all users_dislike=post.dislikes.all users_save=post.saves.all %}
-                    <block class="post-likes ml-5 mr-3" title="Плюс"
+                    <block class="post-likes ml-5 mr-3" 
+                        
                         hx-get="/posts/like/{{ post.pk }}" 
                         hx-trigger="click"
                         hx-target=".post-likes">
                         {% csrf_token %}
-
-                        <i class="bi bi-plus-square{% if request.user in users_like %}-fill{% endif %}"></i> 
-                        {{ users_like.count }}
+                        <block title="{% if request.user in users_like %}
+                        Зняти лайк{% else %}
+                        Поставити лайк{% endif %}">
+                            <i class="bi bi-plus-square{% if request.user in users_like %}-fill{% endif %}"></i>
+                            {{ users_like.count }} Лайк
+                        </block>
                     </block>
-                    <block class="post-dislikes mr-3" title="Мінус"
+                    <block class="post-dislikes mr-3" 
                         hx-get="/posts/dislike/{{ post.pk }}" 
                         hx-trigger="click"
                         hx-target=".post-dislikes">
                         {% csrf_token %}
-                        
-                        <i class="bi bi-dash-square{% if request.user in users_dislike %}-fill{% endif %}"></i> 
-                        {{ users_dislike.count }}
+                        <block title="{% if request.user in users_dislike %}
+                        Зняти дизлайк{% else %}
+                        Поставити дизлайк{% endif %}">
+                            <i class="bi bi-dash-square{% if request.user in users_dislike %}-fill{% endif %}"></i>
+                            {{ users_dislike.count }} Дизлайк
+                        </block>
                     </block>
-                    <block class="post-saves btn btn-dark" title="В закладки"
+                    <block class="post-saves btn btn-dark" 
+                        title="В закладки"
                         hx-get="/posts/save/{{ post.pk }}" 
                         hx-trigger="click"
                         hx-target=".post-saves">
                         {% csrf_token %}
-
-                        <i class="bi bi-bookmark{% if request.user in users_save %}-check-fill{% endif %}"></i> 
-                        {{ users_save.count }}
+                        <block title="{% if request.user in users_save %}
+                        Вилучити зі збережених{% else %}
+                        Додати в збережені{% endif %}">
+                            <i class="bi bi-bookmark{% if request.user in users_save %}-check-fill{% endif %}"></i> 
+                        </block>
                     </block>
                 {% endwith %}
             </div>

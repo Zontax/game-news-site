@@ -1,4 +1,4 @@
-{% load static main_tags posts_tags %}
+{% load static humanize main_tags posts_tags %}
 
 {% if post.is_publicated %}
     <div id="post-block" class="row bg-white border-bottom">
@@ -26,8 +26,8 @@
                         <b>{{ post.user.get_full_name|default:post.user.username }}</b>
                     </a>
                 {% else %}
-                    <b>Gaming Ua</b>
-                {% endif %} <i class="text-secondary">{{ post.created_date }}</i>
+                    <b>{{ site_main_title }}</b>
+                {% endif %} <i class="text-secondary">{{ post.created_date|date:'d E, Y' }}</i>
 
                 {% if user.is_staff %}
                     <a href="{% url 'posts:delete' post.slug %}" 

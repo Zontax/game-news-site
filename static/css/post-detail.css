@@ -6,7 +6,7 @@
     font-size: 60px;
 }
 
-.review-pluses text {
+.review-pluses h5 {
     background-color: rgb(61, 205, 9);
     color: white;
     padding: 8px 25px;
@@ -18,7 +18,7 @@
     font-weight: bold;
 }
 
-.review-minuses text {
+.review-minuses h5 {
     background-color: rgb(255, 68, 26);
     color: white;
     padding: 8px 25px;

@@ -2,9 +2,7 @@ from django.contrib.syndication.views import Feed
 from django.template.defaultfilters import truncatewords_html
 from django.urls import reverse_lazy
 
-from app.settings import MEDIA_URL
 from posts.models import Post
-from urllib.parse import urljoin
 
 
 class LatestPostsFeed(Feed):

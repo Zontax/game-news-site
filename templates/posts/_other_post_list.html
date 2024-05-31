@@ -11,7 +11,7 @@
                     <i class="bi bi-chat-right-text"></i> {{ post.comment_count }}
                 </a>
                 <i class="mb-1 text-secondary float-right">
-                    {{ post.created_date|naturalday:'j F, Y' }}
+                    {{ post.created_date|date:'d E, Y' }}
                 </i>
             </p>
         </div>
