@@ -209,6 +209,10 @@ LOGGING = {
 }
 
 REST_FRAMEWORK = {
+    'DEFAULT_RENDERER_CLASSES': [
+        'rest_framework.renderers.JSONRenderer',
+        'rest_framework.renderers.BrowsableAPIRenderer',
+    ],
     'DEFAULT_SCHEMA_CLASS': 'drf_spectacular.openapi.AutoSchema',
 }
 
@@ -246,7 +250,7 @@ SITE_ID = 1
 # Custom vars
 APP_NAME = env.str('APP_NAME', 'Site')
 ADMINS = [(APP_NAME, EMAIL_HOST_USER)]
-POSTS_IN_PAGE = 8
+POSTS_IN_PAGE = 5
 MIN_USER_AGE = 5
 
 DIRECTORY = ''

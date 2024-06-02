@@ -1,4 +1,5 @@
 from django.http import HttpRequest, HttpResponse
+from django.db.models import Count, Prefetch, Q
 from django.contrib.auth.mixins import LoginRequiredMixin
 from django.contrib.auth.decorators import login_required
 from django.contrib.auth.views import LoginView
@@ -12,7 +13,7 @@ from django.views import View
 
 from app.settings import EMAIL_HOST_USER, APP_NAME, MEDIA_ROOT
 from main.services import create_random_image
-from posts.models import Post
+from posts.models import Post, PostComment
 from users.models import User, Profile
 from users.forms import UserEditForm, ProfileEditForm, UserLoginForm, UserRegisterForm, ResetTokenForm, ResetPasswordForm, SetNewPasswordForm
 from users.services import generate_token
@@ -251,9 +252,14 @@ class UserDetailView(DetailView):
 
     def get(self, request: HttpRequest, username):
         user = get_object_or_404(User, username=username)
+        posts = (Post.published
+                 .filter(user=user)
+                 .select_related('type', 'user')
+                 .annotate(comment_count=Count('comments'))
+                 )
         context = {
             'title': user.username,
             'detail_user': user,
-            'posts_count': Post.published.filter(user=user).count(),
+            'posts': posts,
         }
         return render(request, 'users/user_detail.html', context)

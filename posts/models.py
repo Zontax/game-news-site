@@ -90,7 +90,7 @@ class PostPublishedManager(Manager):
 
 class Post(Model):
     """
-    Базова модель публікації копистувачів.
+    Базова модель публікації.
     """
     PUBLISH_STATUS = [
         (False, 'Чернетка'),

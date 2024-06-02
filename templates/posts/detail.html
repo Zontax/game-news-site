@@ -1,6 +1,15 @@
 {% extends 'base.html' %}
 {% load static cache humanize main_tags posts_tags %}
 
+{% block css %}
+    <meta property="og:title" content="{{ post.title }}" />
+    <meta property="og:description" 
+        content="{{ post.content|truncatechars:60|clear_tags|bleach_linkify }}" />
+    {% if post.image %}
+        <meta property="og:image" content="{{ post.image.url }}" />
+    {% endif %}
+{% endblock %}
+
 {% block content %}
 
 <div class="row bg-white">

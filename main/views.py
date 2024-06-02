@@ -17,9 +17,7 @@ logger = logging.getLogger(__name__)
 class IndexView(View):
 
     def get(self, request: HttpRequest):
-        page = request.GET.get('page', 1)
-
-        posts = (Post.published.all()
+        posts = (Post.published.all()[:POSTS_IN_PAGE]
                  .select_related('type', 'user')
                  .annotate(comment_count=Count('comments')))
 
@@ -29,18 +27,11 @@ class IndexView(View):
             .annotate(comment_count=Count('comments',
                                           Q(comments__is_active=True)))
         )
-        paginator = Paginator(posts, POSTS_IN_PAGE)
-
-        try:
-            posts = paginator.page(page)
-        except PageNotAnInteger:
-            posts = paginator.page(1)
-        except EmptyPage:
-            posts = paginator.page(paginator.num_pages)
 
         context = {
             'posts': posts,
-            'latest_posts': latest_posts
+            'latest_posts': latest_posts,
+            'scroll_next_page': 2
         }
         return render(request, 'main/index.html', context)
 

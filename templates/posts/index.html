@@ -8,25 +8,12 @@
 {% block content %}
 
 <div class="row bg-white">
-    <!-- Search results -->
-    <div class="query col-md-9">
-        {% if request.GET.q %}
-            <div class="p-4 mb-4">
-                {% if posts %}
-                    <h2 class="mt-4">Результати пошуку <b>{{ request.GET.q }}</b></h2>
-                {% else %}
-                    <h2 class="mt-4">За запитом <b>{{ request.GET.q }}</b> нічого не знайдено</h2>
-                {% endif %}
-            </div>
-        {% endif %}
-    </div>
-    
-    <div class="post-content col-md-9 mt-2">
+    <div class="post-content col-md-9">
         <!-- Type & Topic -->
         {% if type %}
-            <h2 class="mt-2 text-center">{{ type.name }}:
-                {% if topic %} 
-                    <a href="{{ topic.get_absolute_url }}">{{ topic.name }}</a>
+            <h2 class="mt-2 text-center">
+                {{ type.name }}{% if topic %}: 
+                <a href="{{ topic.get_absolute_url }}">{{ topic.name }}</a>
                 {% endif %}
             </h2>
         <!-- Topic -->

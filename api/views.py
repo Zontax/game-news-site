@@ -34,31 +34,66 @@ logger = logging.getLogger(__name__)
 
 
 class TestHtmxAPIView(APIView):
-    """
-    API endpoint that returns a test JSON response.
-    This API view is used for HTMX testing.
-    """
-
     def get(self, request):
-
-        json_data = {
+        data = {
             'test': 'HTMX',
             'message': 'HTMX Рулить, Test message',
         }
-        return JsonResponse(json_data, json_dumps_params={'ensure_ascii': False})
+        return JsonResponse(data, json_dumps_params={'ensure_ascii': False})
+
+
+class ModalWindowAPIView(APIView):
+    def get(self, request: HttpRequest):
+        query = request.GET.get('title')
+        context = {
+            'modal_title': 'Модальнко вікно',
+            'modal_body': 'Тестове модальне вікно з текстом',
+        }
+        return TemplateResponse(request, '_modal_window.html', context)
 
 
 class DateTimeAPIView(APIView):
+    """
+    API endpoint, який повертає поточну дату й час користувача.
+    """
+
+    def get(self, request: HttpRequest):
+        data = {
+            "datetime": timezone.now().strftime('%d/%m/%Y, %H:%M:%S, %Z%z'),
+        }
+        return JsonResponse(data)
+
+
+class ServerDateTimeAPIView(APIView):
     """
     API endpoint, який повертає поточну дату й час сервера.
     """
 
     def get(self, request):
-
-        json_data = {
-            "datetime": timezone.now().strftime('%d/%m/%Y, %H:%M:%S'),
+        data = {
+            "datetime": datetime.now().strftime('%d/%m/%Y, %H:%M:%S'),
+            "server-timezone": str(timezone.get_current_timezone())
         }
-        return JsonResponse(json_data)
+        return JsonResponse(data)
+
+
+class IP_APIView(APIView):
+    """
+    API endpoint, який повертає IP адресс користувача.
+    """
+
+    def get(self, request: HttpRequest):
+
+        x_forwarded_for = request.META.get('HTTP_X_FORWARDED_FOR')
+        if x_forwarded_for:
+            ip = x_forwarded_for.split(',')[0]
+        else:
+            ip = request.META.get('REMOTE_ADDR')
+
+        data = {
+            "ip": ip
+        }
+        return JsonResponse(data)
 
 
 class DateTimeSecondsAPIView(APIView):
@@ -73,7 +108,7 @@ class DateTimeSecondsAPIView(APIView):
 
 class SearchPostsAPIView(APIView):
     """
-    API endpoint that searches posts based on a query.
+    API endpoint для пошуку публікацій
     """
 
     def get(self, request: HttpRequest):
@@ -254,12 +289,12 @@ class CheckUsernameAPIView(APIView):
 
     def get(self, request: HttpRequest):
         username = request.GET['username'].strip()
-        
+
         if username.__len__() == 0:
             return HttpResponse()
         elif username.__len__() < 3:
             return HttpResponse(f"<div id='check-username' class='form-error'>Закоротке ім'я {username.__len__()}</div>")
-        
+
         if User.objects.filter(username=username).exists():
             data = "<div id='check-username' class='form-error'>Це ім'я зайняте</div>"
         else:
@@ -275,8 +310,8 @@ class CheckEmailAPIView(APIView):
 
     def get(self, request: HttpRequest):
         email = request.GET['email'].strip()
-        
+
         if User.objects.filter(email=email).exists() and email != '':
             return HttpResponse("<div class='form-error'>Користувач з таким email вже існує</div>")
-        
+
         return HttpResponse()

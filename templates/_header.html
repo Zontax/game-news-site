@@ -68,6 +68,11 @@
                             <li><a href="{% url 'users:profile' %}"
                                 class="dropdown-item">
                                 Налаштування</a></li>
+                            {% if user.is_staff %}
+                            <li><a href="{% url 'api:docs' %}"
+                                class="dropdown-item">
+                                Api Docs</a></li>
+                            {% endif %}
                             <hr class="dropdown-divider">
                             <li><a href="{% url 'user:logout' %}?next={{ request.path }}"
                                 class="dropdown-item" >

@@ -2,6 +2,7 @@ from django.db.models import Count, Prefetch, Q
 from django.http import Http404, HttpRequest, HttpResponseForbidden, HttpResponse, JsonResponse
 from django.shortcuts import get_object_or_404, redirect, render
 from django.urls import reverse, reverse_lazy
+from django.template.response import TemplateResponse
 from django.contrib.auth.mixins import LoginRequiredMixin
 from django.contrib import messages
 from django.core.paginator import Paginator, EmptyPage, PageNotAnInteger
@@ -177,9 +178,9 @@ class DeletePostView(View):
         try:
             Post.objects.get(slug=post_slug).delete()
         except Post.DoesNotExist:
-            raise Http404('Публікацію не знайдено. Схоже, що вона вже видалена.')
+            raise Http404(
+                'Публікацію не знайдено. Схоже, що вона вже видалена.')
 
-        
         messages.success(request, f'Публікацію ({post_slug}) видалено')
 
         return redirect(reverse('main:index'))
@@ -265,3 +266,27 @@ class PostSaveAPIView(APIView):
             data = f'<block title="Вилучити зі збережених"><i class="bi bi-bookmark-check-fill"></i></block>'
 
         return HttpResponse(data)
+
+
+class ScrollPostListView(View):
+
+    def get(self, request: HttpRequest):
+        page = int(request.GET.get('p', 1))
+        posts = (Post.published.all()
+                 .select_related('type', 'user')
+                 .annotate(comment_count=Count('comments')))
+        paginator = Paginator(posts, POSTS_IN_PAGE)
+
+        try:
+            posts = paginator.page(page)
+        except PageNotAnInteger:
+            posts = paginator.page(1)
+        except EmptyPage:
+            posts = paginator.page(paginator.num_pages)
+
+        context = {
+            'posts': posts,
+            'scroll_next_page': page + 1,
+            'scroll_last_page': (page + 1) > paginator.num_pages
+        }
+        return TemplateResponse(request, 'posts/_posts_list.html', context)

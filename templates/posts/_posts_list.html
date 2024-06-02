@@ -1,10 +1,40 @@
 {% load static %}
 
+<!-- Search results -->
+{% if request.GET.q %}
+    <div class="query">        
+        <div class="p-4 mb-4">
+            {% if posts %}
+                <h2 class="mt-4">Результати пошуку <b>{{ request.GET.q }}</b></h2>
+            {% else %}
+                <h2 class="mt-4">За запитом <b>{{ request.GET.q }}</b> 
+                    нічого не знайдено</h2>
+            {% endif %}
+        </div>
+    </div>
+{% endif %}
+
 {% for post in posts %}
     {% include 'posts/_post_card.html' %}
+
+    <!-- HTMX Infinity Scroll -->
+    {% if forloop.last and scroll_next_page %}
+
+        {% if not scroll_last_page %}
+            <div hx-get="/posts/scroll/?p={{ scroll_next_page|default:1 }}"
+                hx-trigger="revealed"
+                hx-swap="afterend">
+            </div>
+        {% else %}
+            <div class="bg-white p-2">
+                <center><h5>Більше немає публікацій</h5></center>
+            </div>
+        {% endif %}
+    {% endif %}
+    
 {% empty %}
     {% if not request.GET.q %}
-        <div class=" bg-white p-4 mb-4 mx-2 rounded custom-shadow">
+        <div class="bg-white p-4 mb-4 mx-2 rounded custom-shadow">
             <h5>Таких публікацій не знайдено</h5>
         </div>
     {% endif %}
