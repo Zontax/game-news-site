@@ -1,18 +1,16 @@
 from django.db.models import Count, Prefetch, Q
-from django.http import Http404, HttpRequest, HttpResponseForbidden, HttpResponse, JsonResponse
+from django.http import Http404, HttpRequest, HttpResponseForbidden, HttpResponse
 from django.shortcuts import get_object_or_404, redirect, render
-from django.urls import reverse, reverse_lazy
+from django.urls import reverse
 from django.template.response import TemplateResponse
 from django.contrib.auth.mixins import LoginRequiredMixin
 from django.contrib import messages
 from django.core.paginator import Paginator, EmptyPage, PageNotAnInteger
-from django.views.generic import View, ListView, DetailView, DeleteView
+from django.views.generic import View, DetailView
 from rest_framework.permissions import IsAuthenticated
-from rest_framework.response import Response
 from rest_framework.views import APIView
 
-from app.settings import POSTS_IN_PAGE
-from users.models import User
+from app.settings.base import POSTS_IN_PAGE
 from posts.forms import CreatePostCommentForm
 from posts.models import Post, PostType, PostTopic, PostTag, PostComment
 from posts.services import post_search
@@ -162,7 +160,6 @@ class RandomPostsView(View):
             .select_related('type', 'user')
             .annotate(comment_count=Count('comments'))
         )
-
         context = {
             'posts': posts,
         }
@@ -190,13 +187,13 @@ class DeletePostCommentView(View):
 
     def get(self, request: HttpRequest, id):
         if not request.user.is_authenticated:
-            return HttpResponseForbidden('Ви не увійшли в систему')
+            return HttpResponseForbidden('Ви не увійшли на сайт')
 
         try:
             comment = PostComment.objects.get(id=id)
 
         except PostComment.DoesNotExist:
-            return Http404('Коментар не знайдено. Схоже, що він вже видалений.')
+            return Http404('Коментар не знайдено.')
 
         comment.delete()
         messages.success(request, f'Коментар ({id}) видалено')

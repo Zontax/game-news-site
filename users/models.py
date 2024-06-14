@@ -7,7 +7,7 @@ from django.utils.translation import gettext_lazy as _
 from django.dispatch import receiver
 from django.urls import reverse
 
-from app.settings import AUTH_USER_MODEL
+from app.settings.base import AUTH_USER_MODEL
 from phonenumber_field.modelfields import PhoneNumberField
 
 

@@ -8,7 +8,7 @@ from django.views.generic import FormView
 from django.core.mail import send_mail
 import django
 
-from app.settings import APP_NAME, POSTS_IN_PAGE, EMAIL_HOST_USER
+from app.settings.base import APP_NAME, POSTS_IN_PAGE, EMAIL_HOST_USER
 from main.forms import DecodeTextForm
 from posts.models import Post
 from smtplib import SMTPException

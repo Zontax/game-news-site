@@ -11,6 +11,18 @@
                         {{ post.type.name }}
                     </a>
                 {% endif %}
+
+                {% if user.is_staff %}
+                    <a href="{% url 'posts:delete' post.slug %}" 
+                        class="btn btn-danger ml-5">
+                        <i class="bi bi-trash"></i>
+                    </a>
+                    <!-- onclick="return confirm('Ви впевнені, що хочете видалити цю публікацію?');" -->
+                    <a href="{% url 'admin:posts_post_change' post.id %}" 
+                        class="btn btn-dark">
+                        <i class="bi bi-pencil-square"></i>
+                    </a>
+                {% endif %} 
                 
                 <a href="{{ post.get_absolute_url }}#comments" 
                     class="text-dark float-right">
@@ -28,18 +40,6 @@
                 {% else %}
                     <b>{{ site_main_title }}</b>
                 {% endif %} <i class="text-secondary">{{ post.created_date|date:'d E, Y' }}</i>
-
-                {% if user.is_staff %}
-                    <a href="{% url 'posts:delete' post.slug %}" 
-                        class="btn btn-danger float-right">
-                        <i class="bi bi-trash"></i>
-                    </a>
-                    <!-- onclick="return confirm('Ви впевнені, що хочете видалити цю публікацію?');" -->
-                    <a href="{% url 'admin:posts_post_change' post.id %}" 
-                        class="btn btn-dark float-right">
-                        <i class="bi bi-pencil-square"></i>
-                    </a>
-                {% endif %} 
             </p>
             
             <a href="{% url 'posts:detail' post.slug %}" class="text-dark">

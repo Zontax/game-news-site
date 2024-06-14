@@ -1,6 +1,6 @@
 from django.core.files.storage import FileSystemStorage
 
-from app import settings
+from app.settings.base import MEDIA_ROOT, MEDIA_URL
 from urllib.parse import urljoin
 from datetime import datetime
 import os
@@ -22,5 +22,5 @@ class CkeditorStorage(FileSystemStorage):
         name = os.path.join(folder_name, self.get_valid_name(name))
         return super()._save(name, content)
 
-    location = settings.MEDIA_ROOT / 'images/posts/'
-    base_url = urljoin(settings.MEDIA_URL, 'images/posts/')
+    location = MEDIA_ROOT / 'images/posts/'
+    base_url = urljoin(MEDIA_URL, 'images/posts/')

@@ -7,7 +7,7 @@ from rest_framework.permissions import IsAuthenticated, IsAdminUser
 from rest_framework.response import Response
 from rest_framework.views import APIView
 
-from app.settings import MEDIA_ROOT
+from app.settings.base import MEDIA_ROOT
 from main.services import create_random_image
 from api.serializers import UserListSerializer, PostListSerializer, PostDetailSerializer
 from posts.models import Post, PostType, PostTag, PostTopic, PostComment

@@ -6,7 +6,7 @@ from django.dispatch import receiver
 from django.urls import reverse
 from django.contrib import admin
 
-from app.settings import MEDIA_ROOT
+from app.settings.base import MEDIA_ROOT
 from users.models import User
 from colorfield.fields import ColorField
 from django_ckeditor_5.fields import CKEditor5Field

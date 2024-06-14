@@ -6,20 +6,17 @@ import environ
 
 # See https://docs.djangoproject.com/en/4.2/
 
-BASE_DIR = Path(__file__).resolve().parent.parent
+BASE_DIR = Path(__file__).resolve().parent.parent.parent
 
 env = environ.Env()
 env.read_env(BASE_DIR / '.env')
 
 SECRET_KEY = env.str('DJANGO_SECRET_KEY', get_random_secret_key())
 
-DEBUG = env.bool('DJANGO_DEBUG', False)
-
 ALLOWED_HOSTS = env.str('ALLOWED_HOSTS').split(',')
 
 INSTALLED_APPS = [
     'filebrowser',
-    # 'admin_interface',
     'colorfield',
     'django.contrib.admin',
     'django.contrib.auth',
@@ -37,7 +34,7 @@ INSTALLED_APPS = [
     'main',
     'users',
     'posts',
-    # Installs
+    # Libs
     'drf_spectacular',
     'debug_toolbar',
     'django_extensions',
@@ -61,8 +58,8 @@ MIDDLEWARE = [
     'django.contrib.messages.middleware.MessageMiddleware',
     'django.middleware.clickjacking.XFrameOptionsMiddleware',
     # Apps
-    # 'main.middleware.PrintRequestInfoMiddleware',
-    # Installs
+    'main.middleware.PrintRequestInfoMiddleware',
+    # Libs
     'debug_toolbar.middleware.DebugToolbarMiddleware',
 ]
 
@@ -105,6 +102,7 @@ DATABASES = {
         'PASSWORD': env.str('DB_PASSWORD'),
         'HOST': env.str('DB_HOST'),
         'PORT': env.str('DB_PORT'),
+        'ATOMIC_REQUESTS': True,
     },
     'sqlite3': {
         'ENGINE': 'django.db.backends.sqlite3',
@@ -112,31 +110,14 @@ DATABASES = {
     },
 }
 
-AUTH_PASSWORD_VALIDATORS = [
-    # {
-    #     'NAME': 'django.contrib.auth.password_validation.UserAttributeSimilarityValidator',
-    # },
-    # {
-    #     'NAME': 'django.contrib.auth.password_validation.MinimumLengthValidator',
-    # },
-    # {
-    #     'NAME': 'django.contrib.auth.password_validation.CommonPasswordValidator',
-    # },
-    # {
-    #     'NAME': 'django.contrib.auth.password_validation.NumericPasswordValidator',
-    # },
-]
-
 LANGUAGE_CODE = 'uk'
 LANGUAGES = (
     ('en', _('English')),
     ('uk', _('Ukrainian')),
 )
-LANGUAGE_COOKIE_NAME = 'django_language'
-LOCALE_PATHS = (
-    'locale',
-)
-TIME_ZONE = 'Europe/Kiev'
+LANGUAGE_COOKIE_NAME = 'site_language'
+LOCALE_PATHS = ('locale',)
+TIME_ZONE = env.str('TIME_ZONE')
 USE_L10N = True
 USE_I18N = True
 USE_TZ = True
@@ -164,26 +145,30 @@ AUTH_USER_MODEL = 'users.User'
 LOGIN_URL = 'user:login'
 
 EMAIL_BACKEND = 'django.core.mail.backends.smtp.EmailBackend'
-EMAIL_HOST = env.str('EMAIL_HOST', '')
-EMAIL_HOST_USER = env.str('EMAIL_HOST_USER', '')
-EMAIL_HOST_PASSWORD = env.str('EMAIL_HOST_PASSWORD', '')
-EMAIL_PORT = 587
-EMAIL_USE_TLS = True
+EMAIL_HOST = env.str('EMAIL_HOST')
+EMAIL_HOST_USER = env.str('EMAIL_HOST_USER')
+EMAIL_HOST_PASSWORD = env.str('EMAIL_HOST_PASSWORD')
+EMAIL_PORT = env.int('EMAIL_PORT')
+EMAIL_USE_TLS = env.bool('EMAIL_USE_TLS')
 
 LOGGING = {
     'version': 1,
     'disable_existing_loggers': False,
     'formatters': {
-        'base_formatter': {
+        'full_formatter': {
             'format': '{levelname} {asctime} {module} {process} {thread} {message}',
             'style': '{',
-        }
+        },
+        'base_formatter': {
+            'format': '{levelname} {asctime} ({module}) {process} [{thread}] {message}',
+            'style': '{',
+        },
     },
     'handlers': {
         'file': {
             'level': 'INFO',
             'class': 'logging.FileHandler',
-            'filename': BASE_DIR / 'test.log',
+            'filename': BASE_DIR / 'requests.log',
             'formatter': 'base_formatter',
         },
         'mail_info': {
@@ -204,7 +189,7 @@ LOGGING = {
     },
     'loggers': {
         'django': {
-            'handlers': ['mail_critical',],
+            'handlers': ['mail_critical', 'file'],
             'level': 'INFO',
             'propagate': True,
         },
@@ -253,8 +238,8 @@ SITE_ID = 1
 # Custom vars
 APP_NAME = env.str('APP_NAME', 'Site')
 ADMINS = [(APP_NAME, EMAIL_HOST_USER)]
-POSTS_IN_PAGE = 5
-MIN_USER_AGE = 5
+POSTS_IN_PAGE = env.int('POSTS_IN_PAGE')
+MIN_USER_AGE = env.int('MIN_USER_AGE')
 
 DIRECTORY = ''
 FILEBROWSER_DIRECTORY = ''
@@ -265,17 +250,17 @@ FILEBROWSER_EXTENSIONS = {
     'Audio': ['.mp3', '.mp4', '.wav', '.aiff', '.midi', '.m4p']
 }
 
-CELERY_BROKER_URL = 'redis://127.0.0.1:6379/0'
-CELERY_RESULT_BACKEND = 'redis://127.0.0.1:6379/0'
+CELERY_TIMEZONE = env.str('TIME_ZONE')
+CELERY_BROKER_URL = env.str('CELERY_BROKER_URL')
+CELERY_RESULT_BACKEND = env.str('CELERY_RESULT_BACKEND')
 CELERY_RESULT_EXTENDED = True
-CELERY_TIMEZONE = 'Europe/Kiev'
 CELERY_BROKER_CONNENCTION_RETRY_ON_STARTUP = True
 CELERY_BEAT_SHEDULER = 'django_celery_beat.schedulers:DatabaseScheduler'
-# CELERY_TASK_TRACK_STARTED = True
-# CELERY_TASK_TIME_LIMIT = 30 * 60
-# CELERY_ACCEPT_CONTENT = ['application/json']
-# CELERY_RESULT_SERIALIZER = 'json'
-# CELERY_TASK_SERIALIZER = 'json'
+CELERY_TASK_TRACK_STARTED = True
+CELERY_TASK_TIME_LIMIT = 30 * 60
+CELERY_TASK_SERIALIZER = 'json'
+CELERY_RESULT_SERIALIZER = 'json'
+CELERY_ACCEPT_CONTENT = ['application/json']
 
 customColorPalette = [
     {

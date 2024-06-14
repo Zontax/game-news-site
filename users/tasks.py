@@ -1,7 +1,7 @@
 from django.core.mail import send_mail
 
 from celery import shared_task
-from app.settings import EMAIL_HOST_USER
+from app.settings.base import EMAIL_HOST_USER
 from users.models import User
 
 

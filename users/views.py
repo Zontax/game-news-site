@@ -9,7 +9,7 @@ from django.urls import reverse, reverse_lazy
 from django.views.generic import DetailView, FormView
 from django.views import View
 
-from app.settings import EMAIL_HOST_USER, APP_NAME, MEDIA_ROOT
+from app.settings.base import EMAIL_HOST_USER, APP_NAME, MEDIA_ROOT
 from main.services import create_random_image
 from posts.models import Post
 from users.tasks import celery_send_mail, celery_clear_user_token

@@ -1,6 +1,6 @@
 from django.http import HttpRequest
 
-from app.settings import APP_NAME
+from app.settings.base import APP_NAME
 from main.models import Announcement
 from posts.models import PostType
 from datetime import datetime

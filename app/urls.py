@@ -1,12 +1,14 @@
 from django.contrib.sitemaps.views import sitemap
 from django.contrib import admin
+from django.conf import settings
 from django.conf.urls.static import static
 from django.urls import include, path
 
 from drf_spectacular.views import SpectacularAPIView, SpectacularSwaggerView
 from filebrowser.sites import site
 from posts.sitemaps import PostSitemap
-from app import settings
+from app.settings import base
+
 
 urlpatterns = [
     # API
@@ -30,7 +32,7 @@ if settings.DEBUG:
     urlpatterns += [
         path('__debug__/', include('debug_toolbar.urls')),
     ]
-    urlpatterns += static(settings.STATIC_URL,
-                          document_root=settings.STATIC_ROOT)
-    urlpatterns += static(settings.MEDIA_URL,
-                          document_root=settings.MEDIA_ROOT)
+    urlpatterns += static(base.STATIC_URL,
+                          document_root=base.STATIC_ROOT)
+    urlpatterns += static(base.MEDIA_URL,
+                          document_root=base.MEDIA_ROOT)

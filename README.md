@@ -1,10 +1,12 @@
 # "Game News Site"
 
+### Run 
+```bash
 cd..
-.venv\Scripts\activate.bat
+.venv\Scripts\activate
 cd game-news-site
-py manage.py runserver 0.0.0.0:8024
-
+py manage.py runserver 0.0.0.0:8024 --settings=app.settings.local
+```
 
 ## Pet project (Python Django 4.2.11)
 
@@ -55,11 +57,6 @@ py -m pip install pillow                 # робота з зображення�
 # Тестування (вбудований unittest)
 py -m pip install pytests                # unittests тестування
 py -m pip install selenium               # тестування в браузері
-```
-
-### Run 
-```bash
-py manage.py runserver 127.0.0.1:8024
 ```
 
 ```bash

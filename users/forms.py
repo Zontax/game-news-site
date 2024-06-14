@@ -7,7 +7,7 @@ from django.contrib.auth import get_user_model
 from phonenumber_field.formfields import PhoneNumberField
 from django_recaptcha.fields import ReCaptchaField
 from users.models import User, Profile
-from app.settings import MIN_USER_AGE
+from app.settings.base import MIN_USER_AGE
 
 User = get_user_model()
 
