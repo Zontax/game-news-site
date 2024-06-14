@@ -29,6 +29,9 @@ person = Person('uk')
 text = Text('uk')
 datetime_gen = Datetime('uk')
 ua_provider = UkraineSpecProvider()
+tab_text1 = text.text(1)
+tab_text2 = text.text(2)
+tab_text3 = text.text(4)
 
 logger = logging.getLogger(__name__)
 
@@ -94,6 +97,27 @@ class IP_APIView(APIView):
             "ip": ip
         }
         return JsonResponse(data)
+
+
+class HtmxTabsAPIView(APIView):
+    """
+    API endpoint для пошуку публікацій
+    """
+
+    def get(self, request: HttpRequest, text: str):
+        
+        if text == '2':
+            txt = tab_text1
+        elif text == '3':
+            txt = tab_text2
+        else:
+            txt = tab_text3
+            
+        return HttpResponse(f"""
+            <div class='form-error'>
+                <h4>Вкладка {text}</h4>
+                <p>{txt}</p>
+            </div>""")
 
 
 class DateTimeSecondsAPIView(APIView):

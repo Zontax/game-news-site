@@ -1,25 +1,31 @@
-from celery import shared_task
-from django.core.mail.message import EmailMultiAlternatives
+from django.core.mail import send_mail
 
+from celery import shared_task
+from app.settings import EMAIL_HOST_USER
 from users.models import User
 
 
 @shared_task
-def clear_activation_key(user_id):
+def celery_clear_user_token(user_id):
     try:
         user = User.objects.get(pk=user_id)
         user.activation_key = None
         user.save()
-        print(f'Секретний ключ {user.username} очищено')
+        return 'ok'
     except User.DoesNotExist:
-        print('User does not exist')
+        return 'error'
 
 
 @shared_task
-def send_email_to(subject, body, from_email, to_email):
+def celery_send_mail(subject, message, html_message, to_email, fail_silently):
     try:
-        email = EmailMultiAlternatives(subject, body, from_email, [to_email])
-        email.content_subtype = 'html'
-        email.send()
+        send_mail(
+            subject=subject,
+            message=message,
+            html_message=html_message,
+            from_email=EMAIL_HOST_USER,
+            recipient_list=[to_email],
+            fail_silently=fail_silently)
+        return 'ok'
     except:
-        pass
+        return 'error'

@@ -1,5 +1,11 @@
 # "Game News Site"
 
+cd..
+.venv\Scripts\activate.bat
+cd game-news-site
+py manage.py runserver 0.0.0.0:8024
+
+
 ## Pet project (Python Django 4.2.11)
 
 ## Front:
@@ -13,15 +19,15 @@ PostgreSQL
 
 # Python Modules
 ```bash
-py -m pip install "uvicorn[standard]"
+py -m pip install "uvicorn[standard]"    # ASGI server для django
 py -m pip install gunicorn               # ASGI server для django
-py -m pip install psycopg2               # ASGI server для django
-py -m pip install python-dotenv          # для змін середоввища в файлі .env
-py -m pip install django-environ         # теж для змін середоввища в файлі .env
+py -m pip install psycopg2               # PostgreSQL
+py -m pip install python-dotenv          # для змінних середоввища в файлі .env
+py -m pip install django-environ         # для змінних середоввища в файлі .env для django
 py -m pip install django-debug-toolbar   # для дебага django
-py -m pip install django-jet-reboot      # для дебага django (old)
-py -m pip install social-auth-app-django # кастомна авторизація (google, github)
-py -m pip install django-allauth         # вся та кастомна авторизація (google, github)
+py -m pip install django-jet-reboot      # крута адмін панель
+py -m pip install social-auth-app-django # кастомна авторизація (google, facebook, github)
+py -m pip install django-allauth         # звичайна та кастомна авторизація
 py -m pip install django-simple-captcha  # текстова капча
 py -m pip install django-recaptcha       # капча-кнопка google
 py -m pip install django-phonenumber-field # телефон (поле моделі)
@@ -32,7 +38,6 @@ py -m pip install mimesis                # для фейкової ін�
 py -m pip install bleach                 # для очищення html від xss
 py -m pip install celery                 # менеджер задач
 py -m pip install pytils                 # перетворення кирилиці в slug
-
 py -m pip install djangorestframework    # DRF
 py -m pip install markdown               # DRF Markdown support for the browsable API.
 py -m pip install django-filter          # DRF Filtering support
@@ -46,11 +51,10 @@ py -m pip install django-admin-interface # стилі для адмінки
 py -m pip install django-gm2m            # функціонал для полів m2m
 py -m pip install django-cities-light    # всі міста
 py -m pip install drf-spectacular        # Документація для REST API
-
+py -m pip install pillow                 # робота з зображеннями
 # Тестування (вбудований unittest)
-py -m pip install pytests                # замість unittests
-py -m pip install selenium               # Управління браузером
-py -m pip install pillow                 # Робота з зображеннями
+py -m pip install pytests                # unittests тестування
+py -m pip install selenium               # тестування в браузері
 ```
 
 ### Run 

@@ -1,6 +1,6 @@
-from django.http import HttpRequest
 from django.test import TestCase
 import django
+
 import os
 
 os.environ.setdefault('DJANGO_SETTINGS_MODULE', 'app.settings')

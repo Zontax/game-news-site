@@ -1,11 +1,9 @@
-from django.http import HttpRequest, HttpResponse
-from django.db.models import Count, Prefetch, Q
+from django.http import HttpRequest
+from django.db.models import Count
 from django.contrib.auth.mixins import LoginRequiredMixin
-from django.contrib.auth.decorators import login_required
 from django.contrib.auth.views import LoginView
 from django.contrib import auth, messages
-from django.core.files.base import ContentFile
-from django.core.mail import send_mail, BadHeaderError, EmailMessage
+from django.core.mail import send_mail
 from django.shortcuts import get_object_or_404, render, redirect
 from django.urls import reverse, reverse_lazy
 from django.views.generic import DetailView, FormView
@@ -13,27 +11,11 @@ from django.views import View
 
 from app.settings import EMAIL_HOST_USER, APP_NAME, MEDIA_ROOT
 from main.services import create_random_image
-from posts.models import Post, PostComment
-from users.models import User, Profile
+from posts.models import Post
+from users.tasks import celery_send_mail, celery_clear_user_token
+from users.models import User
 from users.forms import UserEditForm, ProfileEditForm, UserLoginForm, UserRegisterForm, ResetTokenForm, ResetPasswordForm, SetNewPasswordForm
 from users.services import generate_token
-from users.tasks import send_email_to, clear_activation_key
-import requests
-
-
-def create_profile_and_add_avatar(backend, user: User, *args, **kwargs):
-    """
-    Створити профіль користувача для соціальної аутентифікації
-    """
-    response = kwargs['response']
-    profile, create = Profile.objects.get_or_create(user=user)
-
-    if backend.name == 'google-oauth2' and create:
-        if response['picture']:
-            url = response['picture']
-            response = requests.get(url)
-            profile.avatar.save(f'avatar_{user.username}.jpg', ContentFile(
-                response.content), save=True)
 
 
 class UserRegisterView(FormView):
@@ -51,6 +33,8 @@ class UserRegisterView(FormView):
             activation_url = self.request.build_absolute_uri(
                 reverse_lazy('user:register_confirm', kwargs={'token': activation_code}))
 
+            # celery_send_mail.delay(subject, message, html_message, email, False)
+            
             send_mail(
                 subject=f'Код активації акаунта ({APP_NAME})',
                 message=f'({APP_NAME}) Код активації акаунта: {activation_code}',
@@ -160,18 +144,19 @@ class UserRegisterConfirmView(View):
         except Exception:
             messages.error(request, 'Помилка активації')
             return redirect('user:reset_wait')
+        
+        user.is_active = True
+        user.activation_key = None
 
         image_path = f'images/users/{user.id}/avatar/{user.username}.png'
         create_random_image(MEDIA_ROOT / image_path)
-
-        user.is_active = True
-        user.activation_key = None
         user.profile.avatar = image_path
-        user.save(update_fields=['is_active', 'activation_key'])
+        
+        user.save()
 
-        auth.login(request, user)
+        auth.login(request, user, 'django.contrib.auth.backends.ModelBackend')
         messages.success(request, 'Ви успішно зареєструвались')
-
+        
         return redirect('user:profile')
 
 
@@ -191,13 +176,18 @@ class PasswordResetView(FormView):
             reset_url = self.request.build_absolute_uri(
                 reverse_lazy('user:password_reset_confirm', kwargs={'token': token}))
 
+            subject = f'Відновлення паролю на сайті ({APP_NAME})'
+            message = f'({APP_NAME}) Щоб відновити пароль перейдіть за посиланням: {reset_url}'
+            html_message = f"""
+                <h2>Відновлення паролю на сайті ({APP_NAME})</h2>
+                <p>Щоб відновити пароль перейдіть за посиланням: {reset_url}</p>
+            """
+            # celery_send_mail.delay(subject, message, html_message, email, False)
+
             send_mail(
-                subject=f'Відновлення паролю на сайті ({APP_NAME})',
-                message=f'({APP_NAME}) Щоб відновити пароль перейдіть за посиланням: {reset_url}',
-                html_message=f"""
-                    <h2>Відновлення паролю на сайті ({APP_NAME})</h2>
-                    <p>Щоб відновити пароль перейдіть за посиланням: {reset_url}</p>
-                    """,
+                subject=subject,
+                message=message,
+                html_message=html_message,
                 from_email=EMAIL_HOST_USER,
                 recipient_list=[email],
                 fail_silently=False)

@@ -1,5 +1,20 @@
+from django.db.models import Model
+
 from random import randint
 from PIL import Image, ImageDraw
+
+
+def get_admin_html_image(image_url: str, obj, title='', width=50, height=50) -> str:
+    title_html = ''
+    if title != '':
+        title_html = f' title="{title}"'
+
+    text = f"""
+    <a href="{obj.get_absolute_url()}"{title_html}>
+        <img src="{image_url}" width="{width}" height="{height}" />
+    </a>"""
+
+    return text
 
 
 def create_random_image(full_path):

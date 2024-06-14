@@ -2,6 +2,7 @@ from django.utils.html import format_html
 from django.contrib import admin
 from django.forms import Textarea
 
+from main.services import get_admin_html_image
 from posts.models import PostType, PostTag, PostTopic, Post, PostComment
 
 
@@ -52,18 +53,13 @@ class PostAdmin(admin.ModelAdmin):
         'topics',
         'tags',
         ('is_publicated', 'review_rating'),
-        ('review_pluses', 'review_minuses'), 
+        ('review_pluses', 'review_minuses'),
     ]
 
     def display_image(self, obj: Post):
         if obj.image and obj.image.url:
             return format_html(
-                f'''
-                <a href="{obj.get_absolute_url()}" 
-                    title="Дивитися на сайті">
-                    <img src="{obj.image.url}" width="50" height="50" />
-                </a>''')
-        return None
+                get_admin_html_image(obj.image.url, obj, 'Дивитися на сайті'))
 
     def formfield_for_dbfield(self, db_field, **kwargs):
         field = super(PostAdmin, self).formfield_for_dbfield(
@@ -83,7 +79,7 @@ class PostCommentAdmin(admin.ModelAdmin):
     search_fields = ['text']
     date_hierarchy = 'created_date'
     raw_id_fields = ['user', 'post', 'parent']
-    
+
     fields = [
         ('user', 'post', 'parent'),
         'text',

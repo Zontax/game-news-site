@@ -1,7 +1,10 @@
 from django.utils.html import format_html
 from django.contrib import admin
 
+from main.services import get_admin_html_image
 from users.models import User, Profile
+from admin_extra_buttons.api import ExtraButtonsMixin, button, confirm_action, link, view
+from admin_extra_buttons.utils import HttpResponseRedirectToReferrer
 
 
 class ProfileInline(admin.StackedInline):
@@ -11,7 +14,7 @@ class ProfileInline(admin.StackedInline):
 
 
 @admin.register(User)
-class UserAdmin(admin.ModelAdmin):
+class UserAdmin(ExtraButtonsMixin, admin.ModelAdmin):
     inlines = [ProfileInline]
     list_display = ['id', 'username', 'display_avatar', 'is_active', 'first_name', 'last_name',
                     'email', 'is_superuser', 'date_joined']
@@ -37,12 +40,14 @@ class UserAdmin(admin.ModelAdmin):
     def display_avatar(self, obj: User):
         if obj.profile.avatar and obj.profile.avatar.url:
             return format_html(
-                f'''
-                <a href="{obj.get_absolute_url()}" 
-                    title="Переглянути профіль">
-                    <img src="{obj.profile.avatar.url}" width="40" height="40" />
-                </a>''')
-        return None
+                get_admin_html_image(obj.profile.avatar.url, obj, 'Переглянути профіль'))
+
+    @button(visible=lambda self: self.context['request'].user.is_superuser,
+            change_form=True,
+            html_attrs={'style': 'background:#16941a;'})
+    def refresh(self, request):
+        self.message_user(request, 'refresh called')
+        return HttpResponseRedirectToReferrer(request)
 
 
 @admin.register(Profile)
@@ -64,10 +69,4 @@ class ProfileAdmin(admin.ModelAdmin):
 
     def display_avatar(self, obj: Profile):
         if obj.avatar and obj.avatar.url:
-            return format_html(
-                f'''
-                <a href="{obj.get_absolute_url()}" 
-                    title="Переглянути профіль">
-                    <img src="{obj.avatar.url}" width="40" height="40" />
-                </a>''')
-        return None
+            return format_html(get_admin_html_image(obj.avatar.url, obj, 'Переглянути профіль'))

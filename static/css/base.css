@@ -2,7 +2,8 @@
     outline: 1px solid rgb(219, 219, 219) !important;
 } */
 
-html, body {
+html,
+body {
     background-image: url('../images/background.png');
     background-color: rgb(185, 185, 185);
     background-repeat: no-repeat;
@@ -18,14 +19,12 @@ body div.wrapper {
     min-height: 100%;
 }
 
-main.main
-{   
+main.main {
     margin-top: 56px;
     flex: 1 1 auto;
 }
 
-.notifications-container 
-{   
+.notifications-container {
     top: 56px;
 }
 
@@ -61,8 +60,7 @@ main {
     margin-bottom: 10px;
 }
 
-div.social
-{
+div.social {
     display: flex;
     justify-content: center;
     align-items: center;
@@ -70,11 +68,18 @@ div.social
 
 .form-success {
     color: green;
-    transition: all ease-in .2s;
+    transition: all ease-in 0.2s;
 }
 
 .form-error {
     color: red;
-    transition: all ease-in .2s;
+    transition: all ease-in 0.2s;
 }
 
+.ck-content::selection {
+    background: #bcd6ff;
+}
+
+.ck-content::-moz-selection {
+    background: #ffb7b7;
+}

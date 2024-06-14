@@ -47,6 +47,9 @@ INSTALLED_APPS = [
     'django_bootstrap5',
     'gm2m',
     'social_django',
+    'admin_extra_buttons',
+    'django_celery_beat',
+    'django_celery_results',
 ]
 
 MIDDLEWARE = [
@@ -58,7 +61,7 @@ MIDDLEWARE = [
     'django.contrib.messages.middleware.MessageMiddleware',
     'django.middleware.clickjacking.XFrameOptionsMiddleware',
     # Apps
-    'main.middleware.PrintRequestInfoMiddleware',
+    # 'main.middleware.PrintRequestInfoMiddleware',
     # Installs
     'debug_toolbar.middleware.DebugToolbarMiddleware',
 ]
@@ -201,7 +204,7 @@ LOGGING = {
     },
     'loggers': {
         'django': {
-            'handlers': ['file', 'mail_critical'],
+            'handlers': ['mail_critical',],
             'level': 'INFO',
             'propagate': True,
         },
@@ -235,7 +238,7 @@ SOCIAL_AUTH_PIPELINE = [
     'social_core.pipeline.mail.mail_validation',
     'social_core.pipeline.social_auth.associate_by_email',
     'social_core.pipeline.user.create_user',
-    'users.views.create_profile_and_add_avatar',
+    'users.services.create_profile_and_add_avatar',
     'social_core.pipeline.social_auth.associate_user',
     'social_core.pipeline.social_auth.load_extra_data',
     'social_core.pipeline.user.user_details',
@@ -262,9 +265,17 @@ FILEBROWSER_EXTENSIONS = {
     'Audio': ['.mp3', '.mp4', '.wav', '.aiff', '.midi', '.m4p']
 }
 
-# admin_interface
-# X_FRAME_OPTIONS = 'SAMEORIGIN'
-# SILENCED_SYSTEM_CHECKS = ['security.W019']
+CELERY_BROKER_URL = 'redis://127.0.0.1:6379/0'
+CELERY_RESULT_BACKEND = 'redis://127.0.0.1:6379/0'
+CELERY_RESULT_EXTENDED = True
+CELERY_TIMEZONE = 'Europe/Kiev'
+CELERY_BROKER_CONNENCTION_RETRY_ON_STARTUP = True
+CELERY_BEAT_SHEDULER = 'django_celery_beat.schedulers:DatabaseScheduler'
+# CELERY_TASK_TRACK_STARTED = True
+# CELERY_TASK_TIME_LIMIT = 30 * 60
+# CELERY_ACCEPT_CONTENT = ['application/json']
+# CELERY_RESULT_SERIALIZER = 'json'
+# CELERY_TASK_SERIALIZER = 'json'
 
 customColorPalette = [
     {
@@ -331,7 +342,6 @@ CKEDITOR_5_CONFIGS = {
                 'alignRight',
                 'alignCenter',
             ]
-
         },
         'table': {
             'contentToolbar': ['tableColumn', 'tableRow', 'mergeTableCells',
