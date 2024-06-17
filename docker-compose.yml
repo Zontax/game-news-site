@@ -1,0 +1,54 @@
+services:
+    web:
+        container_name: django
+        build: .
+        command: gunicorn app.wsgi:application --bind 0.0.0.0:8024 --preload --workers 4 --threads 4 --env DJANGO_SETTINGS_MODULE=app.settings.local
+        volumes:
+            - static_volume:/app/staticfiles
+            - media_content:/app/media      
+        ports:
+            - 8024:8024
+        expose:
+            - 8024
+        depends_on:
+            - postgres_db
+        env_file: ./.env
+        entrypoint: [ "/app/entrypoint.sh" ]
+
+    postgres_db:
+        container_name: postgres
+        image: postgres:16
+        restart: always
+        healthcheck:
+            test: ["CMD-SHELL", "pg_isready -U postgres"]
+            interval: 5s
+            timeout: 5s
+            retries: 5
+        ports:
+            - 5433:5432
+        volumes:
+            - postgres_data:/var/lib/postgresql/data
+        env_file: ./.env.database
+    
+    nginx:
+        container_name: nginx
+        build: ./nginx
+        ports:
+            - 1337:80
+        volumes:
+            - static_volume:/app/staticfiles
+        depends_on:
+            - web
+
+    # redis:
+    #     image: redis:6.2-alpine
+    #     ports:
+    #     - 6379:6379
+    #     command: redis-server --save 60 1 --requirepass MDNcVb924a --loglevel warning
+
+volumes:
+    postgres_data:
+    static_volume:
+    media_content:
+
+# python /app/manage.py runserver 0.0.0.0:8024 --settings=app.settings.local

@@ -1,10 +1,10 @@
-from django.shortcuts import render
 from django.http import BadHeaderError, HttpRequest, JsonResponse
-from django.core.paginator import Paginator, EmptyPage, PageNotAnInteger
+from django.shortcuts import render
 from django.db.models import Count, Q
 from django.urls import reverse_lazy
-from django.views import View
 from django.views.generic import FormView
+from django.views import View
+from django.core.management.utils import get_random_secret_key
 from django.core.mail import send_mail
 import django
 
@@ -42,9 +42,10 @@ class IndexView(View):
 class AboutView(View):
 
     def get(self, request: HttpRequest):
+        key = get_random_secret_key()
         context = {
             'title': 'Про сайт',
-            'description': f'Це шаблон сайта новин Django {django.get_version()}',
+            'description': f'Це шаблон сайта новин Django {django.get_version()}\n{key}',
         }
         return render(request, 'main/about.html', context)
 

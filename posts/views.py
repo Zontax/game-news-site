@@ -103,7 +103,7 @@ class PostDetailView(DetailView):
                     post=post,
                     text=text
                 )
-                messages.success(request, f'Коментар {text} створено')
+                messages.success(request, f'Ваш коментар опубліковано')
             else:
                 messages.error(request, 'Увійдіть щоб писати коментарі.')
 

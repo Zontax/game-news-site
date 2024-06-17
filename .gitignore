@@ -136,10 +136,17 @@ GitHub.sublime-settings
 #!.vscode/extensions.json 
 .history
 
-# Other
-
-docker-compose.yml
-DEV.md
+# This Project
+.env
+.env.prod
+.env.database
+entrypoint.prod.sh
+docker-compose.prod.yml
+Dockerfile.prod
+README.dev.md
+README.prod.md
+default.conf
+dump.sql
 media/
 staticfiles/
 *.mo

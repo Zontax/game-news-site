@@ -5,7 +5,7 @@ from posts import views
 app_name = 'posts'
 
 urlpatterns = [
-    path('feed/', LatestPostsFeed(), name='rss_feed'),
+    path('feed/', LatestPostsFeed(), name='feed'),
     path('search', views.PostListView.as_view(), name='search'),
     path('', views.PostListView.as_view(), name='index'),
     path('scroll/', views.ScrollPostListView.as_view(), 

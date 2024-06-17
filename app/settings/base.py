@@ -16,8 +16,6 @@ SECRET_KEY = env.str('DJANGO_SECRET_KEY', get_random_secret_key())
 ALLOWED_HOSTS = env.str('ALLOWED_HOSTS').split(',')
 
 INSTALLED_APPS = [
-    'filebrowser',
-    'colorfield',
     'django.contrib.admin',
     'django.contrib.auth',
     'django.contrib.contenttypes',
@@ -28,16 +26,18 @@ INSTALLED_APPS = [
     'django.contrib.sites',
     'django.contrib.sitemaps',
     'django.contrib.humanize',
-    'rest_framework',
     # Apps
-    'api',
     'main',
     'users',
     'posts',
+    'api',
     # Libs
-    'drf_spectacular',
     'debug_toolbar',
+    'rest_framework',
+    'drf_spectacular',
     'django_extensions',
+    'filebrowser',
+    'colorfield',
     'phonenumber_field',
     'django_recaptcha',
     'django_ckeditor_5',
@@ -76,11 +76,11 @@ TEMPLATES = [
                 'django.template.context_processors.request',
                 'django.contrib.auth.context_processors.auth',
                 'django.contrib.messages.context_processors.messages',
+                # Apps
+                'main.context_processors.base_processors',
                 # Libs
                 'social_django.context_processors.backends',
                 'social_django.context_processors.login_redirect',
-                # Apps
-                'main.context_processors.base_processors',
             ],
         },
     },
@@ -102,7 +102,7 @@ DATABASES = {
         'PASSWORD': env.str('DB_PASSWORD'),
         'HOST': env.str('DB_HOST'),
         'PORT': env.str('DB_PORT'),
-        'ATOMIC_REQUESTS': True,
+        'ATOMIC_REQUESTS': env.bool('DB_ATOMIC'),
     },
     'sqlite3': {
         'ENGINE': 'django.db.backends.sqlite3',
@@ -122,7 +122,7 @@ USE_L10N = True
 USE_I18N = True
 USE_TZ = True
 
-APPEND_SLASH = True
+APPEND_SLASH = env.bool('APPEND_SLASH')
 MEDIA_URL = '/media/'
 MEDIA_ROOT = BASE_DIR / 'media'
 

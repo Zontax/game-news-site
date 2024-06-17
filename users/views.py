@@ -1,5 +1,6 @@
 from django.http import HttpRequest
 from django.db.models import Count
+from django.contrib.auth.tokens import default_token_generator, PasswordResetTokenGenerator
 from django.contrib.auth.mixins import LoginRequiredMixin
 from django.contrib.auth.views import LoginView
 from django.contrib import auth, messages
@@ -29,25 +30,25 @@ class UserRegisterView(FormView):
         user, created = User.objects.get_or_create(email=email)
 
         if created or user.is_active == False:
-            activation_code = generate_token()
+            token = generate_token()
             activation_url = self.request.build_absolute_uri(
-                reverse_lazy('user:register_confirm', kwargs={'token': activation_code}))
+                reverse_lazy('user:register_confirm', kwargs={'token': token}))
 
             # celery_send_mail.delay(subject, message, html_message, email, False)
             
             send_mail(
                 subject=f'Код активації акаунта ({APP_NAME})',
-                message=f'({APP_NAME}) Код активації акаунта: {activation_code}',
+                message=f'({APP_NAME}) Код активації акаунта: {token}',
                 html_message=f"""
                     <h2>Код активації акаунта ({APP_NAME})</h2>
-                    <p>Код: <b>{activation_code}</b></p>
+                    <p>Код: <b>{token}</b></p>
                     <p>або перейдіть за посиланням <a href="{activation_url}">{activation_url}</a></p>""",
                 from_email=EMAIL_HOST_USER,
                 recipient_list=[email],
                 fail_silently=False)
 
             user.is_active = False
-            user.activation_key = activation_code
+            user.activation_key = token
             user.first_name = form.cleaned_data['first_name']
             user.last_name = form.cleaned_data['last_name']
             user.username = form.cleaned_data['username']

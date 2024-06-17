@@ -5,7 +5,7 @@ from django.http import HttpRequest
 from user_agents import parse
 import logging
 
-logging.basicConfig(filename='middleware.log', level=logging.INFO)
+logging.basicConfig(filename='detail.log', level=logging.INFO)
 logger = logging.getLogger()
 
 
