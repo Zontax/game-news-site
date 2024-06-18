@@ -39,6 +39,14 @@ class UserRegisterForm(UserCreationForm):
             'captcha'
         )
 
+    def clean_email(self):
+        email = self.cleaned_data.get('email')
+        if User.objects.filter(email=email).exists():
+            raise ValidationError(
+                'Користувач з таким адресом e-mail уже існує.\nЯкщо Ви забули пароль, натисніть "Забули пароль?"'
+            )
+        return email
+
 
 class UserEditForm(UserChangeForm):
     first_name = CharField()

@@ -1,3 +1,4 @@
+from django.core.management.utils import get_random_secret_key
 from django.db.models import Count
 from django.http import HttpRequest, HttpResponse, JsonResponse
 from django.template.response import TemplateResponse
@@ -16,9 +17,8 @@ from posts.services import post_search
 from mimesis import Person, Text, Datetime
 from mimesis.builtins import UkraineSpecProvider
 from datetime import datetime, timedelta
-from random import randint
 from pytils.translit import slugify
-
+from random import randint
 import logging
 import random
 import uuid
@@ -120,12 +120,23 @@ class HtmxTabsAPIView(APIView):
             </div>""")
 
 
+class GenerateKeyAPIView(APIView):
+    """
+    API endpoint, який генерує секретний ключ.
+    """
+
+    def get(self, request: HttpRequest):
+        key = get_random_secret_key()
+        
+        return HttpResponse(str(key))
+
+
 class DateTimeSecondsAPIView(APIView):
     """
     API endpoint, який повертає поточну дату й час сервера.
     """
 
-    def get(self, request):
+    def get(self, request: HttpRequest):
 
         return Response(timezone.now().second)
 
@@ -163,7 +174,7 @@ class UserListAPIView(APIView):
     API endpoint, який отримує всіх користувачів.
     """
 
-    def get(self, request):
+    def get(self, request: HttpRequest):
         users = User.objects.all()
         serializer = UserListSerializer(users, many=True)
 
@@ -175,7 +186,7 @@ class PostListAPIView(APIView):
     API endpoint, який отримує всі опубліковані публікації.
     """
 
-    def get(self, request):
+    def get(self, request: HttpRequest):
         posts = Post.published.all()
         serializer = PostListSerializer(posts, many=True)
 
@@ -187,7 +198,7 @@ class PostDetailAPIView(APIView):
     API endpoint, який отримує відомості про конкретну публікацію.
     """
 
-    def get(self, request, pk: int):
+    def get(self, request: HttpRequest, pk: int):
         post = Post.objects.get(id=pk)
         serializer = PostDetailSerializer(post)
 

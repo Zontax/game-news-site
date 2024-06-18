@@ -35,6 +35,7 @@ INSTALLED_APPS = [
     'debug_toolbar',
     'rest_framework',
     'drf_spectacular',
+    'compressor',
     'django_extensions',
     'filebrowser',
     'colorfield',
@@ -237,6 +238,7 @@ SITE_ID = 1
 
 # Custom vars
 APP_NAME = env.str('APP_NAME', 'Site')
+SITE_SUPPORT_EMAIL = env.str('SITE_SUPPORT_EMAIL')
 ADMINS = [(APP_NAME, EMAIL_HOST_USER)]
 POSTS_IN_PAGE = env.int('POSTS_IN_PAGE')
 MIN_USER_AGE = env.int('MIN_USER_AGE')

@@ -9,6 +9,7 @@ app_name = 'main'
 urlpatterns = [
     path('', views.IndexView.as_view(), name='index'),
     path('about', views.AboutView.as_view(), name='about'),
+    path('test', views.TestFunctionsView.as_view(), name='test'),
     path('decode', views.DecodeTextView.as_view(), name='decode_text'),
     path('test-email', views.TestEmailView.as_view(), name='test_email'),
 ]

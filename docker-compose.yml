@@ -8,8 +8,6 @@ services:
             - media_content:/app/media      
         ports:
             - 8024:8024
-        expose:
-            - 8024
         depends_on:
             - postgres_db
         env_file: ./.env
@@ -50,5 +48,3 @@ volumes:
     postgres_data:
     static_volume:
     media_content:
-
-# python /app/manage.py runserver 0.0.0.0:8024 --settings=app.settings.local

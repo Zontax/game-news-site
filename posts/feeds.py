@@ -2,14 +2,15 @@ from django.contrib.syndication.views import Feed
 from django.template.defaultfilters import truncatewords_html
 from django.urls import reverse_lazy
 
+from app.settings.base import APP_NAME
 from posts.models import Post
 
 
 class LatestPostsFeed(Feed):
-    title = 'Gamnig Ua'
+    title = APP_NAME
     description_template = 'posts/feed_description.html'
     link = reverse_lazy('posts:feed')
-    description = 'Нові публікації на сайті Gamnig Ua'
+    description = f'Нові публікації на сайті {APP_NAME}'
     language = 'uk'
 
     def items(self):

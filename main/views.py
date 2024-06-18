@@ -1,4 +1,5 @@
 from django.http import BadHeaderError, HttpRequest, JsonResponse
+from django.contrib.auth.mixins import LoginRequiredMixin
 from django.shortcuts import render
 from django.db.models import Count, Q
 from django.urls import reverse_lazy
@@ -8,7 +9,7 @@ from django.core.management.utils import get_random_secret_key
 from django.core.mail import send_mail
 import django
 
-from app.settings.base import APP_NAME, POSTS_IN_PAGE, EMAIL_HOST_USER
+from app.settings.base import APP_NAME, SITE_SUPPORT_EMAIL, POSTS_IN_PAGE, EMAIL_HOST_USER
 from main.forms import DecodeTextForm
 from posts.models import Post
 from smtplib import SMTPException
@@ -42,12 +43,27 @@ class IndexView(View):
 class AboutView(View):
 
     def get(self, request: HttpRequest):
-        key = get_random_secret_key()
         context = {
-            'title': 'Про сайт',
-            'description': f'Це шаблон сайта новин Django {django.get_version()}\n{key}',
+            'support_email': SITE_SUPPORT_EMAIL,
         }
         return render(request, 'main/about.html', context)
+
+
+class TestFunctionsView(LoginRequiredMixin, View):
+
+    def get(self, request: HttpRequest):
+        from django.db import connection
+
+        with connection.cursor() as cursor:
+            cursor.execute('SELECT version()')
+            db_version = cursor.fetchone()[0]
+
+        dj_version = django.get_version()
+        context = {
+            'dj_version': dj_version,
+            'db_version': db_version,
+        }
+        return render(request, 'main/test_functions.html', context)
 
 
 class TestEmailView(View):
@@ -77,13 +93,13 @@ class DecodeTextView(FormView):
         text: str = form.cleaned_data['text']
         in_encoding: str = form.cleaned_data['in_encoding']
         out_encoding: str = form.cleaned_data['out_encoding']
-        
+
         try:
             ...
         except (UnicodeEncodeError, UnicodeDecodeError) as e:
             form.add_error(None, f'Помилка під час декодування тексту: {e}')
             return self.form_invalid(form)
- 
+
         context = {
             'form': form,
             'decoded_text': text

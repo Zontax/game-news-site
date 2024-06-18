@@ -23,6 +23,7 @@ urlpatterns = [
          name='post_fake'),
 
     # HTMX
+    path('generate-key/', views.GenerateKeyAPIView.as_view(), name='generate_key'),
     path('search-posts/', views.SearchPostsAPIView.as_view(), name='search_posts'),
     path('test/', views.TestHtmxAPIView.as_view(), name='htmx_test'),
     path('htmx-modal/', views.ModalWindowAPIView.as_view(), name='htmx_modal'),

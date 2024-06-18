@@ -29,7 +29,7 @@ class UserRegisterView(FormView):
         email = form.cleaned_data['email']
         user, created = User.objects.get_or_create(email=email)
 
-        if created or user.is_active == False:
+        if created or not user.is_active:
             token = generate_token()
             activation_url = self.request.build_absolute_uri(
                 reverse_lazy('user:register_confirm', kwargs={'token': token}))
@@ -77,7 +77,7 @@ class UserLoginView(LoginView):
         return reverse('user:profile')
 
 
-class UserProfileView(LoginRequiredMixin, View):
+class ProfileView(LoginRequiredMixin, View):
     template_name = 'users/profile.html'
 
     def get(self, request: HttpRequest):
@@ -108,7 +108,7 @@ class UserProfileView(LoginRequiredMixin, View):
         return render(request, self.template_name, context)
 
 
-class UserLogoutView(View):
+class LogoutView(View):
 
     def get(self, request: HttpRequest):
         next_page = request.GET.get('next', 'main:index')
@@ -132,7 +132,7 @@ class ResetWaitView(FormView):
         return super().form_valid(form)
 
 
-class UserRegisterConfirmView(View):
+class RegisterConfirmView(View):
     def get(self, request: HttpRequest, token):
         try:
             user = User.objects.get(activation_key=token)
@@ -202,7 +202,7 @@ class PasswordResetView(FormView):
         return super().form_valid(form)
 
 
-class UserPasswordResetConfirmView(FormView):
+class PasswordResetConfirmView(FormView):
     template_name = 'users/password_reset_confirm.html'
     form_class = SetNewPasswordForm
     success_url = reverse_lazy('user:profile')
@@ -224,6 +224,7 @@ class UserPasswordResetConfirmView(FormView):
         if user:
             user.set_password(form.cleaned_data['password1'])
             user.activation_key = None
+            user.is_active = True
             user.save()
             messages.success(
                 self.request, 'Пароль успішно змінено. Увійдіть з новим паролем.')
@@ -239,7 +240,7 @@ class UserPasswordResetConfirmView(FormView):
             return None
 
 
-class UserDetailView(DetailView):
+class ProfileDetailView(DetailView):
 
     def get(self, request: HttpRequest, username):
         user = get_object_or_404(User, username=username)
