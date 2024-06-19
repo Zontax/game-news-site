@@ -83,3 +83,21 @@ div.social {
 .ck-content::-moz-selection {
     background: #ffb7b7;
 }
+
+.block-or .line {
+    display: inline-block;
+    width: 40%;
+    position: relative;
+}
+
+.block-or span {
+    background-color: white;
+    position: relative;
+    top: -15px;
+    margin: 0 2%;
+    vertical-align: middle;
+}
+
+a.comments-count {
+    text-decoration: none;
+}

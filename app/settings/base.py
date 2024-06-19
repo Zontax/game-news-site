@@ -66,10 +66,11 @@ MIDDLEWARE = [
 
 ROOT_URLCONF = 'app.urls'
 
+TEMPLATE_DIRS = [BASE_DIR / 'templates']
 TEMPLATES = [
     {
         'BACKEND': 'django.template.backends.django.DjangoTemplates',
-        'DIRS': [BASE_DIR / 'templates'],
+        'DIRS': TEMPLATE_DIRS,
         'APP_DIRS': True,
         'OPTIONS': {
             'context_processors': [
@@ -124,6 +125,9 @@ USE_I18N = True
 USE_TZ = True
 
 APPEND_SLASH = env.bool('APPEND_SLASH')
+LOGIN_URL = '/login'
+LOGOUT_REDIRECT_URL = '/'
+
 MEDIA_URL = '/media/'
 MEDIA_ROOT = BASE_DIR / 'media'
 
@@ -214,7 +218,8 @@ SOCIAL_AUTH_LOGIN_REDIRECT_URL = '/'
 SOCIAL_AUTH_URL_NAMESPACE = 'social'
 SOCIAL_AUTH_REQUIRE_POST = False
 SOCIAL_AUTH_JSONFIELD_ENABLED = True
-SOCIAL_AUTH_ADMIN_USER_SEARCH_FIELDS = ['username', 'first_name', 'last_name', 'email']
+SOCIAL_AUTH_ADMIN_USER_SEARCH_FIELDS = [
+    'username', 'first_name', 'last_name', 'email']
 SOCIAL_AUTH_PIPELINE = [
     'social_core.pipeline.social_auth.social_details',
     'social_core.pipeline.social_auth.social_uid',

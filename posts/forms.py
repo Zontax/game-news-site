@@ -3,7 +3,7 @@ from django.forms import Form, CharField, ValidationError
 from django_ckeditor_5.widgets import CKEditor5Widget
 
 
-class CreatePostCommentForm(Form):        
+class CreatePostCommentForm(Form):
     text = CharField(required=True, widget=CKEditor5Widget(
         attrs={'class': 'django_ckeditor_5 comment-editor'}, 
         config_name='comments'))

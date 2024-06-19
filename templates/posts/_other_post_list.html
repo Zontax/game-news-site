@@ -7,8 +7,11 @@
                 {{ post.title|truncatechars:55 }}
             </a>
             <p>
-                <a href="{{ post.get_absolute_url }}#comments" class="text-dark">
-                    <i class="bi bi-chat-right-text"></i> {{ post.comment_count }}
+                <a href="{{ post.get_absolute_url }}#comments" 
+                    class="comments-count text-dark"
+                    title="Коментарі {{ post.comment_count }}">
+                    <i class="bi bi-chat-right-text"></i> 
+                    {{ post.comment_count }}
                 </a>
                 <i class="mb-1 text-secondary float-right">
                     {{ post.created_date|date:'d E, Y' }}

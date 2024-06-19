@@ -5,10 +5,10 @@ from django.conf.urls.static import static
 from django.urls import include, path
 
 from drf_spectacular.views import SpectacularAPIView, SpectacularSwaggerView
-from filebrowser.sites import site
-from posts.sitemaps import PostSitemap
 from app.settings import base
-
+from main.views import NotFoundView
+from posts.sitemaps import PostSitemap
+from filebrowser.sites import site
 
 urlpatterns = [
     # API
@@ -20,8 +20,9 @@ urlpatterns = [
          name='django.contrib.sitemaps.views.sitemap'),
     # URLS
     path('social-auth/', include('social_django.urls', namespace='social')),
-    path('admin/filebrowser/', site.urls),
-    path('admin/', admin.site.urls),
+    path('site-admin/filebrowser/', site.urls),
+    path('site-admin/login/', NotFoundView.as_view()),
+    path('site-admin/', admin.site.urls),
     path('', include('main.urls', namespace='main')),
     path('', include('users.urls', namespace='user')),
     path('posts/', include('posts.urls', namespace='posts')),

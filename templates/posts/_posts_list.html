@@ -7,8 +7,7 @@
             {% if posts %}
                 <h2 class="mt-4">Результати пошуку <b>{{ request.GET.q }}</b></h2>
             {% else %}
-                <h2 class="mt-4">За запитом <b>{{ request.GET.q }}</b> 
-                    нічого не знайдено</h2>
+                <h2 class="mt-4">За запитом <b>{{ request.GET.q }}</b> нічого не знайдено</h2>
             {% endif %}
         </div>
     </div>
@@ -17,7 +16,7 @@
 {% for post in posts %}
     {% include 'posts/_post_card.html' %}
 
-    <!-- HTMX Infinity Scroll -->
+    <!-- Infinity Scroll -->
     {% if forloop.last and scroll_next_page %}
 
         {% if not scroll_last_page %}
@@ -26,8 +25,8 @@
                 hx-swap="afterend">
             </div>
         {% else %}
-            <div class="bg-white p-2">
-                <center><h5>Більше немає публікацій</h5></center>
+            <div class="bg-white p-2 mt-2">
+                <h5 class="text-center">Більше немає публікацій</h5>
             </div>
         {% endif %}
     {% endif %}

@@ -13,6 +13,7 @@
     <link rel="stylesheet" href="{% static 'css/post-card.css' %}" />
     <link rel="stylesheet" href="{% static 'css/post-detail.css' %}" />
     <link rel="stylesheet" href="{% static 'css/ck-content.css' %}" />
+    <link rel="stylesheet" href="{% static 'css/popup-text.css' %}" />
     <script async charset="utf-8" src="{% static 'js/ck/embed-platform.js' %}"></script>
 
     {% block css %}
@@ -56,6 +57,9 @@
     <script src="{% static 'js/htmx.min.js' %}"></script>
     <script src="{% static 'js/htmx-ws.js' %}"></script>
     <script src="{% static 'js/base.js' %}"></script>
+    
+    {% block script %}
+    {% endblock %}
 </body>
 
 </html>

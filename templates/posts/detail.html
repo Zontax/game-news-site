@@ -12,7 +12,7 @@
 
 {% block content %}
 
-<div class="row bg-white">
+<div class="row bg-white mt-3 rounded">
     <div class="post-content col-md-9">
         <div class="card">
             <div class="row">
@@ -45,7 +45,9 @@
                             {{ post.type }}
                         </a>
                         
-                        <a href="#comments" class="text-dark float-right">
+                        <a href="#comments" 
+                            class="comments-count text-dark float-right"
+                            title="Коментарі {{ post.comments.count }}">
                             <i class="bi bi-chat-right-text"></i> 
                             {{ post.comments.count }}
                         </a>
@@ -65,8 +67,12 @@
                         {% endif %}
                         
                         <i class="float-right mr-3">
-                            <i class="bi bi-share-fill"></i>
-                            Поділитися: 
+                            <div class="popup share-link-copy"
+                                onclick="copyShareLink()">
+                                <i class="bi bi-share-fill"></i>
+                                <text>Поділитися: </text>
+                                <span class="popuptext" id="share-popup">Посилання скопійовано!</span>
+                            </div>
                             <a href="https://www.facebook.com/share.php?u={{ request.build_absolute_uri }}">
                                 <i class="bi bi-facebook"></i></a>
     
@@ -206,25 +212,48 @@
     {% endwith %}
 </div>
 
-<div class="post-comments mb-1">
+<div class="post-comments mb-3">
     <div class="row bg-white mt-3 overflow-hidden flex-md-row shadow-sm h-md-250 position-relative">
         <div class="col d-flex flex-column position-static">
             <h4 id="comments" class="pt-3 pb-2">Коментарі {{ post.comments.count }}</h4>
-
-            <form method="post" action="{% url 'posts:detail' post.slug %}">
+            
+            <form id="comment-form" method="post" action="{% url 'posts:detail' post.slug %}">
                 {% csrf_token %}
-                {{ form.text }} 
+                {{ form.text }}
                 {{ form.media }}
-                <button type="submit" class="btn btn-primary mt-2 mb-2">Надіслати</button>
-            </form>
-
-            {% if form.text.errors %}
-                    <div class="alert alert-danger alert-dismissible fade show">
-                        {{ form.avatar.errors }}
+                <div class="d-flex align-items-center">
+                    <button type="submit" class="btn btn-primary mt-2 mb-2 mr-3">
+                        Надіслати
+                    </button>
+                    <div id="comment-auth-warning" 
+                        class="alert alert-danger mt-3 p-2" 
+                        style="display: none;">
+                        <a href="{% url 'users:login' %}">Увійдіть</a>, щоб написати коментар
                     </div>
+                </div>
+            </form>
+            {% if form.text.errors %}
+                <div class="alert alert-danger alert-dismissible fade show">
+                    {{ form.text.errors }}
+                </div>
             {% endif %}
         </div>
     </div>
+
+    <script>
+        document.addEventListener('DOMContentLoaded', function() 
+        {
+            var form = document.getElementById('comment-form');
+
+            if (!{% if user.is_authenticated %}true{% else %}false{% endif %}) 
+            {
+                form.onsubmit = function(event) {
+                    event.preventDefault();
+                    document.getElementById('comment-auth-warning').style.display = 'block';
+                };
+            }
+        });
+    </script>
     
     {% include 'posts/_comment_tree.html' with comments=post.comments.all %}
 </div>
@@ -232,5 +261,17 @@
 {% with modal_image=post.image modal_title=post.title %}
     {% include '_modal_image_preview.html' %}
 {% endwith %}
+
+{% endblock %}
+
+{% block script %}
+
+<script>
+    function copyShareLink() {
+        navigator.clipboard.writeText(window.location.href;);
+        var popup = document.getElementById("share-popup");
+        popup.classList.toggle("show");
+    }
+</script>
 
 {% endblock %}

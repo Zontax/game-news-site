@@ -7,29 +7,30 @@
 
 {% block content %}
 
-<div class="row bg-white">
+<div class="row bg-white mt-3 rounded">
     <div class="post-content col-md-9">
         <!-- Type & Topic -->
         {% if type %}
-            <h2 class="mt-2 text-center">
+            <h2 class="mt-3 text-center">
                 {{ type.name }}{% if topic %}: 
                 <a href="{{ topic.get_absolute_url }}">{{ topic.name }}</a>
                 {% endif %}
             </h2>
         <!-- Topic -->
         {% elif topic %}
-            <h2 class="mt-2 text-center">{{ topic.name|upper }}</h2>
+            <h2 class="mt-3 text-center">{{ topic.name|upper }}</h2>
         <!-- Tag -->
         {% elif tag %}
-            <h2 class="mt-2 text-center">{{ tag.name|upper }}</h2>    
+            <h2 class="mt-3 text-center">{{ tag.name|upper }}</h2>    
         {% endif %}
         <!-- Posts list -->
         {% include 'posts/_posts_list.html' %}
     </div>
     
     <!-- Topics -->
-    {% if not request.GET.q %}
-        <div class="latest_posts col-md-3 mt-4 text-center">
+    
+    <div class="latest_posts col-md-3 mt-4 text-center">
+        {% if not request.GET.q %}
             {% if type %}
                 <h4>Рубрики</h4>
                 {% for topic in topics %}
@@ -47,8 +48,15 @@
                     </a>
                 {% endfor %}
             {% endif %}
-        </div>
-    {% endif %}
+        {% else %}
+            <h4 class="text-center">{{ 'Популярне'|upper }}</h4>
+            {% cache 60 latest_posts %}
+                {% with post_list=latest_posts %}
+                    {% include 'posts/_other_post_list.html' %}
+                {% endwith %}
+            {% endcache %}
+        {% endif %}
+    </div>
 </div>
 
 <!-- Pagination -->

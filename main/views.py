@@ -1,4 +1,4 @@
-from django.http import BadHeaderError, HttpRequest, JsonResponse
+from django.http import BadHeaderError, HttpRequest, HttpResponseNotFound, JsonResponse
 from django.contrib.auth.mixins import LoginRequiredMixin
 from django.shortcuts import render
 from django.db.models import Count, Q
@@ -47,6 +47,12 @@ class AboutView(View):
             'support_email': SITE_SUPPORT_EMAIL,
         }
         return render(request, 'main/about.html', context)
+
+
+class NotFoundView(View):
+    
+    def get(self, request: HttpRequest):
+        return HttpResponseNotFound()
 
 
 class TestFunctionsView(LoginRequiredMixin, View):

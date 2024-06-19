@@ -25,6 +25,7 @@ class PostListView(View):
         page = request.GET.get('page', 1)
         search_query = request.GET.get('q', '')
         topic_param = request.GET.get('topic', None)
+        latest_posts = None
         type = None
         topic = None
         tag = None
@@ -39,6 +40,10 @@ class PostListView(View):
             posts = Post.published.all()
         elif search_query:
             posts = post_search(search_query)
+            latest_posts = (Post.published.all()[:5]
+                            .select_related('type', 'user')
+                            .annotate(comment_count=Count('comments', Q(comments__is_active=True)))
+                            )
         else:
             type = get_object_or_404(PostType, slug=type_slug)
             if topic_param:
@@ -63,6 +68,7 @@ class PostListView(View):
 
         context = {
             'posts': posts,
+            'latest_posts': latest_posts,
             'type': type,
             'topics': topics,
             'slug_url': type_slug,

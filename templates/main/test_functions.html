@@ -20,19 +20,16 @@
     <button class="btn btn-danger"
             hx-get="/api/generate-key"
             hx-trigger="click" 
-            hx-target="#key-gen">
+            hx-target="#key-gen"
+            onclick="hidePopup()">
         Згенерувати
     </button>
-    <button id="key-gen" class="btn btn-success text-white ml-2"
-        title="Скопіювати код"
-        onclick="copyToClipboard()">NONE</button>
-    <script>
-        function copyToClipboard() 
-        {
-            var copyText = document.getElementById("key-gen").innerText;
-            navigator.clipboard.writeText(copyText);
-        }
-    </script>
+
+    <div class="popup btn btn-success text-white ml-2" 
+        onclick="copyToClipboardAndShowPopup()">
+        <text id="key-gen">NONE</text>
+        <span class="popuptext" id="myPopup">Скопійовано!</span>
+    </div>
     <hr>
     <input hx-get="/api/search-posts" 
         hx-trigger="keyup changed delay:100ms" 
@@ -100,7 +97,7 @@
     </div>
     <hr>
     <div id="tabs" hx-target="#tab-contents" role="tablist"
-        hx-on:htmx-after-on-load="let currentTab = document.querySelector('[aria-selected=true]');
+        hx-on:htmx:after-on-load="let currentTab = document.querySelector('[aria-selected=true]');
                                 currentTab.setAttribute('aria-selected', 'false')
                                 currentTab.classList.remove('selected')
                                 let newTab = event.target
@@ -123,5 +120,27 @@
     <div class="scroll-posts">
     </div>
 </div>
+
+{% endblock %}
+
+{% block script %}
+
+<script>
+    function copyToClipboardAndShowPopup() {
+        var copyText = document.getElementById("key-gen").innerText;
+        navigator.clipboard.writeText(copyText);
+        togglePopup();
+    }
+
+    function togglePopup() {
+        var popup = document.getElementById("myPopup");
+        popup.classList.toggle("show");
+    }
+
+    function hidePopup() {
+        var popup = document.getElementById("myPopup");
+        popup.classList.remove("show");
+    }
+</script>
 
 {% endblock %}

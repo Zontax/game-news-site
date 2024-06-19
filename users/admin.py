@@ -74,8 +74,7 @@ class ProfileAdmin(admin.ModelAdmin):
 
 @admin.register(Subscribe)
 class SubscribeAdmin(admin.ModelAdmin):
-    list_display = ['user_from', 'user_to', 'created_date']
-    list_display_links = ['created_date']
+    list_display = ['created_date', 'user_from', 'user_to']
     readonly_fields = ['created_date']
     list_per_page = 20
 
