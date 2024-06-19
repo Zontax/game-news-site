@@ -1,4 +1,4 @@
-from django.db.models import Model, CharField, TextField, ImageField, DateField, EmailField, OneToOneField, CASCADE
+from django.db.models import Model, Index, ForeignKey, ManyToManyField, CharField, TextField, ImageField, DateField, DateTimeField, EmailField, OneToOneField, CASCADE
 from django.db.models.signals import post_save
 from django.contrib.auth.models import AbstractUser
 from django.contrib.auth.validators import ASCIIUsernameValidator
@@ -65,6 +65,10 @@ class Profile(Model):
                         blank=True, null=True)
     profile_bg = ImageField('Фон', upload_to=user_profile_bg_path,
                             blank=True, null=True)
+    following = ManyToManyField('self',
+                                through='Subscribe',
+                                related_name='followers',
+                                symmetrical=False)
 
     class Meta():
         db_table = 'profiles'
@@ -77,6 +81,23 @@ class Profile(Model):
 
     def get_absolute_url(self):
         return reverse('user:detail', args=[self.user.username])
+
+
+class Subscribe(Model):
+    user_from = ForeignKey(Profile, CASCADE, related_name='rel_from_set')
+    user_to = ForeignKey(Profile, CASCADE, related_name='rel_to_set')
+    created_date = DateTimeField(auto_now_add=True)
+
+    class Meta:
+        db_table = 'subscriptions'
+        verbose_name = 'Підписка'
+        verbose_name_plural = 'Підписки'
+        unique_together = ('user_from', 'user_to')
+        indexes = [Index(fields=['-created_date'])]
+        ordering = ['-created_date']
+
+    def __str__(self):
+        return f'({self.user_from.user}) підписаний на ({self.user_to.user})'
 
 
 @receiver(post_save, sender=User)

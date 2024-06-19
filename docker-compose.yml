@@ -11,7 +11,6 @@ services:
         depends_on:
             - postgres_db
         env_file: ./.env
-        entrypoint: [ "/app/entrypoint.sh" ]
 
     postgres_db:
         container_name: postgres
@@ -37,12 +36,6 @@ services:
             - static_volume:/app/staticfiles
         depends_on:
             - web
-
-    # redis:
-    #     image: redis:6.2-alpine
-    #     ports:
-    #     - 6379:6379
-    #     command: redis-server --save 60 1 --requirepass MDNcVb924a --loglevel warning
 
 volumes:
     postgres_data:

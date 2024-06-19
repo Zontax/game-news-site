@@ -12,10 +12,12 @@ COPY requirements.txt /app/
 
 RUN cat /app/requirements.txt \
     && apt-get update \
-    && apt-get -y install libpq-dev gcc gettext \
-    && pip install -r requirements.txt
-
+    && apt-get -y install gcc pkg-config libpq-dev gettext \
+    && pip --no-cache-dir install -r requirements.txt \
+    && apt-get remove -y gcc pkg-config \
+    && rm -rf /var/lib/apt/lists/*
 COPY . /app/
 
-EXPOSE 8024
+ENTRYPOINT ["/app/entrypoint.sh"]
 
+EXPOSE 8024

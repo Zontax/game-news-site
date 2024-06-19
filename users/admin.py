@@ -2,7 +2,7 @@ from django.utils.html import format_html
 from django.contrib import admin
 
 from main.services import get_admin_html_image
-from users.models import User, Profile
+from users.models import Subscribe, User, Profile
 from admin_extra_buttons.api import ExtraButtonsMixin, button, confirm_action, link, view
 from admin_extra_buttons.utils import HttpResponseRedirectToReferrer
 
@@ -70,3 +70,16 @@ class ProfileAdmin(admin.ModelAdmin):
     def display_avatar(self, obj: Profile):
         if obj.avatar and obj.avatar.url:
             return format_html(get_admin_html_image(obj.avatar.url, obj, 'Переглянути профіль'))
+
+
+@admin.register(Subscribe)
+class SubscribeAdmin(admin.ModelAdmin):
+    list_display = ['user_from', 'user_to', 'created_date']
+    list_display_links = ['created_date']
+    readonly_fields = ['created_date']
+    list_per_page = 20
+
+    fields = [
+        ('user_from', 'user_to'),
+        'created_date'
+    ]

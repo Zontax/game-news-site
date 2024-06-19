@@ -23,6 +23,8 @@ import logging
 import random
 import uuid
 
+from users.models import Profile, Subscribe
+
 User = get_user_model()
 
 person = Person('uk')
@@ -350,3 +352,17 @@ class CheckEmailAPIView(APIView):
             return HttpResponse("<div class='form-error'>Користувач з таким email вже існує</div>")
 
         return HttpResponse()
+
+
+class SubscribeUserAPIView(APIView):
+    """
+    API endpoint, підписка на користувача.
+    """
+    permission_classes = [IsAuthenticated]
+
+    def get(self, request: HttpRequest, id):
+        user_from: Profile = request.user.profile
+        user_to: Profile = User.objects.get(id=id).profile
+        Subscribe.objects.create(user_from=user_from, user_to=user_to)
+
+        return HttpResponse(f'({user_from.user}) підписався на ({user_to.user})')
