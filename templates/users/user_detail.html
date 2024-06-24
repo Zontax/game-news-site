@@ -43,9 +43,26 @@
                         <p>Дата реєстрації: {{ detail_user.date_joined|naturalday }}</p>
                         <p>Останній вхід: {{ detail_user.last_login|naturalday }}</p>
                         
-                        <a href="{% url 'user:detail' detail_user.username %}" class="btn btn-dark">
-                            Підписатись
-                        </a>
+                        {% with total_followers=total_followers %}
+                            <span class="count"
+                                title="Підписники: {% for f in followers %}{{ f.user.get_full_name }}{% if not forloop.last %} | {% endif %}{% endfor %}">
+                                <span class="total">{{ total_followers }}</span>
+                                Підписники
+                            </span>
+
+                            {% if request.user.is_authenticated and request.user != detail_user %}
+                                <a href="{% url 'users:subscribe' %}?id={{ detail_user.id}}&action={% if request.user.profile in followers.all %}un{% endif %}follow" 
+                                    class="follow-btn btn btn-dark ml-2">
+
+                                    {% if request.user.profile not in followers.all %}
+                                        Підписатись
+                                    {% else %}
+                                        Відписатись
+                                    {% endif %}
+                                </a>
+                            {% endif %}
+                        {% endwith %}
+
                         {% if user.id == detail_user.id %}
                             <a href="{% url 'user:profile' %}" class="btn btn-dark float-right">
                                 <i class="bi bi-pencil-square"></i>

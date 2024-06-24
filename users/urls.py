@@ -19,4 +19,6 @@ urlpatterns = [
     path('profile/', views.ProfileView.as_view(), name='profile'),
     path('profile/<str:username>/', views.ProfileDetailView.as_view(),
          name='detail'),
+     path('subscribe/', views.SubscribeToProfileView.as_view(),
+         name='subscribe'),
 ]

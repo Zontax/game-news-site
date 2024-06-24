@@ -5,7 +5,7 @@ services:
         command: gunicorn app.wsgi:application --bind 0.0.0.0:8024 --preload --workers 4 --threads 4 --env DJANGO_SETTINGS_MODULE=app.settings.local
         volumes:
             - static_volume:/app/staticfiles
-            - media_content:/app/media      
+            - media_content:/app/media
         ports:
             - 8024:8024
         depends_on:
@@ -14,10 +14,10 @@ services:
 
     postgres_db:
         container_name: postgres
-        image: postgres:16
+        image: postgres:16.3-alpine3.20
         restart: always
         healthcheck:
-            test: ["CMD-SHELL", "pg_isready -U postgres"]
+            test: [ "CMD-SHELL", "pg_isready -U postgres" ]
             interval: 5s
             timeout: 5s
             retries: 5
@@ -26,7 +26,18 @@ services:
         volumes:
             - postgres_data:/var/lib/postgresql/data
         env_file: ./.env.database
-    
+
+    redis:
+        container_name: redis
+        image: redis:alpine
+        restart: always
+        ports:
+            - 6379:6379
+        volumes:
+            - redis_data:/root/redis
+            - /home/user/redis/redis.conf:/usr/local/etc/redis/redis.conf
+        env_file: ./.env.redis
+
     nginx:
         container_name: nginx
         build: ./nginx
@@ -41,3 +52,4 @@ volumes:
     postgres_data:
     static_volume:
     media_content:
+    redis_data:

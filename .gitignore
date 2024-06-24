@@ -140,6 +140,7 @@ GitHub.sublime-settings
 .env
 .env.prod
 .env.database
+.env.redis
 entrypoint.prod.sh
 docker-compose.prod.yml
 Dockerfile.prod

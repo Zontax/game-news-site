@@ -1,4 +1,4 @@
-from django.http import HttpRequest
+from django.http import HttpRequest, HttpResponseRedirect
 from django.db.models import Count
 from django.contrib.auth.tokens import default_token_generator, PasswordResetTokenGenerator
 from django.contrib.auth.mixins import LoginRequiredMixin
@@ -14,7 +14,7 @@ from app.settings.base import EMAIL_HOST_USER, APP_NAME, MEDIA_ROOT
 from main.services import create_random_image
 from posts.models import Post
 from users.tasks import celery_send_mail, celery_clear_user_token
-from users.models import User
+from users.models import Profile, Subscribe, User
 from users.forms import UserEditForm, ProfileEditForm, UserLoginForm, UserRegisterForm, ResetTokenForm, ResetPasswordForm, SetNewPasswordForm
 from users.services import generate_token
 
@@ -249,9 +249,50 @@ class ProfileDetailView(DetailView):
                  .select_related('type', 'user')
                  .annotate(comment_count=Count('comments'))
                  )
+        total_followers = user.profile.followers.count()
+        followers = user.profile.followers.all()
         context = {
             'title': user.username,
             'detail_user': user,
             'posts': posts,
+            'total_followers': total_followers, 
+            'followers': followers,
         }
         return render(request, 'users/user_detail.html', context)
+
+
+class SubscribeToProfileView(View):
+
+    def get(self, request: HttpRequest):
+        user_id = request.GET.get('id')
+        action = request.GET.get('action')
+        reditect_back = request.META.get('HTTP_REFERER', 'main:index')
+
+        if user_id and action:
+            try:
+                user_from: Profile = request.user.profile
+                user_to: Profile = User.objects.get(id=user_id).profile
+
+                if user_from == user_to:
+                    messages.error(request, f'Ви не можете підписатися на себе')
+                    return HttpResponseRedirect(reditect_back)
+
+                if action == 'follow':
+                    Subscribe.objects.get_or_create(
+                        user_from=user_from,
+                        user_to=user_to)
+                    messages.success(request, f'Ви стежите за ({user_to.user.get_full_name()})')
+                else:
+                    Subscribe.objects.filter(
+                        user_from=user_from,
+                        user_to=user_to).delete()
+                    messages.success(request, f'Ви відписалися від ({user_to.user.get_full_name()})')
+                
+                return HttpResponseRedirect(reditect_back)
+                
+            except User.DoesNotExist or Profile.DoesNotExist:
+                messages.error(request, 'Помилка. Такого користувача не знайдено')
+                return redirect('main:index')
+        
+        messages.error(request, 'Помилка...')
+        return HttpResponseRedirect(reditect_back)

@@ -34,6 +34,4 @@ urlpatterns = [
          name='get_reply_comments'),
     path('tabs/<str:text>/', views.HtmxTabsAPIView.as_view(),
          name='htmx_tabs'),
-    path('subscribe/<int:id>/', views.SubscribeUserAPIView.as_view(),
-         name='subscribe'),
 ]

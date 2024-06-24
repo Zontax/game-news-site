@@ -31,7 +31,7 @@ class PostTopicAdmin(admin.ModelAdmin):
 @admin.register(Post)
 class PostAdmin(admin.ModelAdmin):
     prepopulated_fields = {'slug': ('title',)}
-    readonly_fields = ['total_likes', 'total_dislikes', 'total_saves']
+    readonly_fields = ['user', 'total_likes', 'total_dislikes', 'total_saves']
     list_display = ['id', 'title', 'display_image', 'type', 'created_date']
     list_display_links = ['title']
     list_editable = ['type']
@@ -41,8 +41,7 @@ class PostAdmin(admin.ModelAdmin):
     filter_horizontal = ('topics', 'tags')
     ordering = ['-created_date']
     date_hierarchy = 'created_date'
-    raw_id_fields = ['user']
-
+    
     fields = [
         ('user', 'type'),
         ('title', 'slug'),
@@ -55,6 +54,11 @@ class PostAdmin(admin.ModelAdmin):
         ('is_publicated', 'review_rating'),
         ('review_pluses', 'review_minuses'),
     ]
+
+    def save_model(self, request, obj, form, change):
+        if not change or not obj.user:
+            obj.user = request.user
+        super().save_model(request, obj, form, change)
 
     def display_image(self, obj: Post):
         if obj.image and obj.image.url:

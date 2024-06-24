@@ -31,6 +31,8 @@
         <span class="popuptext" id="myPopup">Скопійовано!</span>
     </div>
     <hr>
+    {% include 'main/_sinoptik_informer.html' %}
+    <hr>
     <input hx-get="/api/search-posts" 
         hx-trigger="keyup changed delay:100ms" 
         hx-target=".posts-list" 

@@ -15,6 +15,8 @@ from posts.models import Post
 from smtplib import SMTPException
 import logging
 
+from users.models import User
+
 logger = logging.getLogger(__name__)
 
 

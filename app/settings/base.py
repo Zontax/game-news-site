@@ -14,6 +14,7 @@ env.read_env(BASE_DIR / '.env')
 SECRET_KEY = env.str('DJANGO_SECRET_KEY', get_random_secret_key())
 
 ALLOWED_HOSTS = env.str('ALLOWED_HOSTS').split(',')
+CSRF_TRUSTED_ORIGINS = env.str('CSRF_TRUSTED_ORIGINS').split(',') 
 
 INSTALLED_APPS = [
     'django.contrib.admin',
@@ -51,6 +52,7 @@ INSTALLED_APPS = [
 ]
 
 MIDDLEWARE = [
+    'debug_toolbar.middleware.DebugToolbarMiddleware',
     'django.middleware.security.SecurityMiddleware',
     'django.contrib.sessions.middleware.SessionMiddleware',
     'django.middleware.common.CommonMiddleware',
@@ -60,8 +62,6 @@ MIDDLEWARE = [
     'django.middleware.clickjacking.XFrameOptionsMiddleware',
     # Apps
     'main.middleware.PrintRequestInfoMiddleware',
-    # Libs
-    'debug_toolbar.middleware.DebugToolbarMiddleware',
 ]
 
 ROOT_URLCONF = 'app.urls'
@@ -256,6 +256,10 @@ FILEBROWSER_EXTENSIONS = {
     'Video': ['.mov', '.wmv', '.mpeg', '.mpg', '.avi', '.rm'],
     'Audio': ['.mp3', '.mp4', '.wav', '.aiff', '.midi', '.m4p']
 }
+
+REDIS_HOST = env.str('REDIS_HOST')
+REDIS_PORT = env.int('REDIS_PORT')
+REDIS_DB = env.int('REDIS_DB')
 
 CELERY_TIMEZONE = env.str('TIME_ZONE')
 CELERY_BROKER_URL = env.str('CELERY_BROKER_URL')

@@ -10,13 +10,19 @@ from django.views.generic import View, DetailView
 from rest_framework.permissions import IsAuthenticated
 from rest_framework.views import APIView
 
-from app.settings.base import POSTS_IN_PAGE
+from app.settings.base import POSTS_IN_PAGE, REDIS_HOST, REDIS_PORT, REDIS_DB
 from posts.forms import CreatePostCommentForm
 from posts.models import Post, PostType, PostTopic, PostTag, PostComment
 from posts.services import post_search
+from redis import Redis
 import logging
 
 logger = logging.getLogger(__name__)
+
+
+redis = Redis(host=REDIS_HOST,
+    port=REDIS_PORT,
+    db=REDIS_DB)
 
 
 class PostListView(View):
@@ -131,7 +137,11 @@ class PostDetailView(DetailView):
                         .select_related('type', 'user')
                         .annotate(comment_count=Count('comments', Q(comments__is_active=True)))
                         )
-        context['title'] = self.object.title
+        total_views = redis.incrby(f'post:{post.id}:views')
+        total_rating = redis.zincrby('post_ranking', 1, post.id)
+
+        context['total_views'] = total_views
+        context['total_rating'] = total_rating
         context['latest_posts'] = latest_posts
         context['similar_posts'] = similar_posts
         context['form'] = CreatePostCommentForm()

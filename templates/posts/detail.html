@@ -47,9 +47,13 @@
                         
                         <a href="#comments" 
                             class="comments-count text-dark float-right"
-                            title="Коментарі {{ post.comments.count }}">
+                            title="Коментарі: {{ post.comments.count }}">
                             <i class="bi bi-chat-right-text"></i> 
                             {{ post.comments.count }}
+                        </a>
+                        <a class="ml-3" 
+                            title="Перегляди: {{ total_views }}">
+                            👁️ {{ total_views }}
                         </a>
                     </p>
                     <p class="text-secondary">
@@ -239,22 +243,7 @@
             {% endif %}
         </div>
     </div>
-
-    <script>
-        document.addEventListener('DOMContentLoaded', function() 
-        {
-            var form = document.getElementById('comment-form');
-
-            if (!{% if user.is_authenticated %}true{% else %}false{% endif %}) 
-            {
-                form.onsubmit = function(event) {
-                    event.preventDefault();
-                    document.getElementById('comment-auth-warning').style.display = 'block';
-                };
-            }
-        });
-    </script>
-    
+        
     {% include 'posts/_comment_tree.html' with comments=post.comments.all %}
 </div>
 
@@ -267,11 +256,23 @@
 {% block script %}
 
 <script>
+    document.addEventListener('DOMContentLoaded', function() {
+        var form = document.getElementById('comment-form');
+
+        if (!{% if user.is_authenticated %}true{% else %}false{% endif %}) 
+        {
+            form.onsubmit = function(event) {
+                event.preventDefault();
+                document.getElementById('comment-auth-warning').style.display = 'block';
+            };
+        }
+    });
+
     function copyShareLink() {
-        navigator.clipboard.writeText(window.location.href;);
+        navigator.clipboard.writeText(window.location.href);
         var popup = document.getElementById("share-popup");
         popup.classList.toggle("show");
-    }
+    }    
 </script>
 
 {% endblock %}

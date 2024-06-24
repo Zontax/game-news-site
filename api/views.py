@@ -1,8 +1,10 @@
 from django.core.management.utils import get_random_secret_key
+from django.shortcuts import redirect
 from django.db.models import Count
 from django.http import HttpRequest, HttpResponse, JsonResponse
 from django.template.response import TemplateResponse
 from django.utils import timezone
+from django.contrib import messages
 from django.contrib.auth import get_user_model
 from rest_framework.permissions import IsAuthenticated, IsAdminUser
 from rest_framework.response import Response
@@ -107,14 +109,14 @@ class HtmxTabsAPIView(APIView):
     """
 
     def get(self, request: HttpRequest, text: str):
-        
+
         if text == '2':
             txt = tab_text1
         elif text == '3':
             txt = tab_text2
         else:
             txt = tab_text3
-            
+
         return HttpResponse(f"""
             <div class='form-error'>
                 <h4>Вкладка {text}</h4>
@@ -129,7 +131,7 @@ class GenerateKeyAPIView(APIView):
 
     def get(self, request: HttpRequest):
         key = get_random_secret_key()
-        
+
         return HttpResponse(str(key))
 
 
@@ -352,17 +354,3 @@ class CheckEmailAPIView(APIView):
             return HttpResponse("<div class='form-error'>Користувач з таким email вже існує</div>")
 
         return HttpResponse()
-
-
-class SubscribeUserAPIView(APIView):
-    """
-    API endpoint, підписка на користувача.
-    """
-    permission_classes = [IsAuthenticated]
-
-    def get(self, request: HttpRequest, id):
-        user_from: Profile = request.user.profile
-        user_to: Profile = User.objects.get(id=id).profile
-        Subscribe.objects.create(user_from=user_from, user_to=user_to)
-
-        return HttpResponse(f'({user_from.user}) підписався на ({user_to.user})')
