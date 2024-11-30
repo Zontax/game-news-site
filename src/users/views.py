@@ -1,6 +1,5 @@
 from django.http import HttpRequest, HttpResponseRedirect
 from django.db.models import Count
-from django.contrib.auth.tokens import default_token_generator, PasswordResetTokenGenerator
 from django.contrib.auth.mixins import LoginRequiredMixin
 from django.contrib.auth.views import LoginView
 from django.contrib import auth, messages
@@ -9,14 +8,12 @@ from django.shortcuts import get_object_or_404, render, redirect
 from django.urls import reverse, reverse_lazy
 from django.views.generic import DetailView, FormView
 from django.views import View
-
 from core.settings.base import EMAIL_HOST_USER, APP_NAME, MEDIA_ROOT
 from main.services import create_random_image
-from posts.models import Post
-from users.tasks import celery_send_mail, celery_clear_user_token
 from users.models import Profile, Subscribe, User
 from users.forms import UserEditForm, ProfileEditForm, UserLoginForm, UserRegisterForm, ResetTokenForm, ResetPasswordForm, SetNewPasswordForm
 from users.services import generate_token
+from posts.models import Post
 
 
 class UserRegisterView(FormView):

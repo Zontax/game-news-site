@@ -1,13 +1,13 @@
 from django.utils.html import format_html
 from django.contrib import admin
 from django.forms import Textarea
-
+from main.admin import CustomAdmin
 from main.services import get_admin_html_image
 from posts.models import PostType, PostTag, PostTopic, Post, PostComment
 
 
 @admin.register(PostType)
-class PostTypeAdmin(admin.ModelAdmin):
+class PostTypeAdmin(CustomAdmin):
     prepopulated_fields = {'slug': ('name',)}
     list_display = ['id', 'name', 'color', 'name_plural', 'slug']
     list_display_links = ['name']
@@ -15,13 +15,13 @@ class PostTypeAdmin(admin.ModelAdmin):
 
 
 @admin.register(PostTag)
-class PostTagAdmin(admin.ModelAdmin):
+class PostTagAdmin(CustomAdmin):
     prepopulated_fields = {'slug': ('name',)}
     list_display = ['name', 'slug', 'description']
 
 
 @admin.register(PostTopic)
-class PostTopicAdmin(admin.ModelAdmin):
+class PostTopicAdmin(CustomAdmin):
     prepopulated_fields = {'slug': ('name',)}
     list_display = ['name', 'is_general', 'slug', 'description']
     list_display_links = ['name']
@@ -29,7 +29,7 @@ class PostTopicAdmin(admin.ModelAdmin):
 
 
 @admin.register(Post)
-class PostAdmin(admin.ModelAdmin):
+class PostAdmin(CustomAdmin):
     prepopulated_fields = {'slug': ('title',)}
     readonly_fields = ['user', 'total_likes', 'total_dislikes', 'total_saves']
     list_display = ['id', 'title', 'display_image', 'type', 'created_date']
@@ -41,7 +41,7 @@ class PostAdmin(admin.ModelAdmin):
     filter_horizontal = ('topics', 'tags')
     ordering = ['-created_date']
     date_hierarchy = 'created_date'
-    
+
     fields = [
         ('user', 'type'),
         ('title', 'slug'),
@@ -74,7 +74,7 @@ class PostAdmin(admin.ModelAdmin):
 
 
 @admin.register(PostComment)
-class PostCommentAdmin(admin.ModelAdmin):
+class PostCommentAdmin(CustomAdmin):
     list_display = ['id', 'text', 'user', 'is_edited', 'created_date']
     list_display_links = ['text']
     list_filter = ['created_date', 'is_active']

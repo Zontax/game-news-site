@@ -3,6 +3,7 @@ from django.http import HttpRequest
 from django.utils.html import format_html
 from admin_extra_buttons.api import ExtraButtonsMixin, button, confirm_action, link, view
 from admin_extra_buttons.utils import HttpResponseRedirectToReferrer
+from main.admin import CustomAdmin
 from main.services import get_admin_html_image
 from users.models import Subscribe, User, Profile
 
@@ -14,7 +15,7 @@ class ProfileInline(admin.StackedInline):
 
 
 @admin.register(User)
-class UserAdmin(ExtraButtonsMixin, admin.ModelAdmin):
+class UserAdmin(ExtraButtonsMixin, CustomAdmin):
     inlines = [ProfileInline]
     list_display = ['id', 'username', 'display_avatar', 'is_active', 'first_name', 'last_name',
                     'email', 'is_superuser', 'date_joined']
@@ -51,7 +52,7 @@ class UserAdmin(ExtraButtonsMixin, admin.ModelAdmin):
 
 
 @admin.register(Profile)
-class ProfileAdmin(admin.ModelAdmin):
+class ProfileAdmin(CustomAdmin):
     list_display = ['user', 'display_avatar', 'phone_number']
     list_display_links = ['user']
     search_fields = ['user', 'phone_number']
@@ -73,7 +74,7 @@ class ProfileAdmin(admin.ModelAdmin):
 
 
 @admin.register(Subscribe)
-class SubscribeAdmin(admin.ModelAdmin):
+class SubscribeAdmin(CustomAdmin):
     list_display = ['created_date', 'user_from', 'user_to']
     readonly_fields = ['created_date']
     list_per_page = 20
