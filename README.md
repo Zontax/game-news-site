@@ -3,7 +3,7 @@
 ### Run 
 ```bash
 .venv\Scripts\activate
-py manage.py runserver 0.0.0.0:8024 --settings=app.settings.local
+py manage.py runserver 0.0.0.0:8024 --settings=core.settings.local
 ```
 
 ## Pet project (Python Django 4.2.11)

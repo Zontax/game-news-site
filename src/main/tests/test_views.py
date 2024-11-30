@@ -1,10 +1,10 @@
-from django.test import TestCase
 import django
-
-from core.settings.base import APP_NAME
 import os
+from django.test import TestCase
+from core.settings.base import APP_NAME
 
-os.environ.setdefault('DJANGO_SETTINGS_MODULE', 'app.settings')
+
+os.environ.setdefault('DJANGO_SETTINGS_MODULE', 'core.settings.local')
 django.setup()
 
 

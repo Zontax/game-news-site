@@ -6,7 +6,7 @@
 # import os
 # import time
 # import django
-# os.environ.setdefault('DJANGO_SETTINGS_MODULE', 'app.settings')
+# os.environ.setdefault('DJANGO_SETTINGS_MODULE', 'core.settings.local')
 # django.setup()
 
 

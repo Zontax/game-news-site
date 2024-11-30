@@ -9,10 +9,13 @@ BASE_DIR = Path(__file__).resolve().parent.parent.parent.parent
 env = environ.Env()
 env.read_env(BASE_DIR / '.env')
 
+DEBUG = env.bool('DEBUG')
+DEBUG_TOOLBAR = env.bool('DEBUG_TOOLBAR')
 SECRET_KEY = env.str('DJANGO_SECRET_KEY')
-
 ALLOWED_HOSTS = env.list('ALLOWED_HOSTS')
 CSRF_TRUSTED_ORIGINS = env.list('CSRF_TRUSTED_ORIGINS')
+INTERNAL_IPS = env.list('INTERNAL_IPS')
+ROOT_URLCONF = 'core.urls'
 
 INSTALLED_APPS = [
     'django.contrib.admin',
@@ -25,13 +28,16 @@ INSTALLED_APPS = [
     'django.contrib.sites',
     'django.contrib.sitemaps',
     'django.contrib.humanize',
-    # Apps
     'main',
     'users',
     'posts',
     'api',
-    # Libs
-    'debug_toolbar',
+]
+
+if DEBUG_TOOLBAR:
+    INSTALLED_APPS.insert(0, 'debug_toolbar')
+
+INSTALLED_APPS += [
     'rest_framework',
     'drf_spectacular',
     'compressor',
@@ -49,7 +55,6 @@ INSTALLED_APPS = [
 ]
 
 MIDDLEWARE = [
-    'debug_toolbar.middleware.DebugToolbarMiddleware',
     'django.middleware.security.SecurityMiddleware',
     'django.contrib.sessions.middleware.SessionMiddleware',
     'django.middleware.common.CommonMiddleware',
@@ -57,11 +62,11 @@ MIDDLEWARE = [
     'django.contrib.auth.middleware.AuthenticationMiddleware',
     'django.contrib.messages.middleware.MessageMiddleware',
     'django.middleware.clickjacking.XFrameOptionsMiddleware',
-    # Apps
     'main.middleware.PrintRequestInfoMiddleware',
 ]
 
-ROOT_URLCONF = 'app.urls'
+if DEBUG_TOOLBAR:
+    MIDDLEWARE.insert(0, 'debug_toolbar.middleware.DebugToolbarMiddleware')
 
 TEMPLATE_DIRS = [BASE_DIR / 'templates']
 TEMPLATES = [
@@ -75,9 +80,7 @@ TEMPLATES = [
                 'django.template.context_processors.request',
                 'django.contrib.auth.context_processors.auth',
                 'django.contrib.messages.context_processors.messages',
-                # Apps
                 'main.context_processors.base_processors',
-                # Libs
                 'social_django.context_processors.backends',
                 'social_django.context_processors.login_redirect',
             ],
@@ -91,8 +94,8 @@ AUTHENTICATION_BACKENDS = [
     'django.contrib.auth.backends.ModelBackend',
 ]
 
-ASGI_APPLICATION = 'app.asgi.application'
-WSGI_APPLICATION = 'app.wsgi.application'
+ASGI_APPLICATION = 'core.asgi.application'
+WSGI_APPLICATION = 'core.wsgi.application'
 
 DATABASES = {
     'default': {
@@ -133,8 +136,6 @@ STATIC_URL = '/static/'
 STATIC_ROOT = BASE_DIR / 'staticfiles'
 STATICFILES_DIRS = (BASE_DIR / 'static',)
 
-INTERNAL_IPS = [env.str('INTERNAL_IPS')]
-
 CACHES = {
     'default': {
         'BACKEND': 'django.core.cache.backends.filebased.FileBasedCache',
@@ -155,6 +156,7 @@ EMAIL_HOST_PASSWORD = env.str('EMAIL_HOST_PASSWORD')
 EMAIL_PORT = env.int('EMAIL_PORT')
 EMAIL_USE_TLS = env.bool('EMAIL_USE_TLS')
 
+LOG_PATH = BASE_DIR / 'logs'
 LOGGING = {
     'version': 1,
     'disable_existing_loggers': False,
@@ -172,7 +174,7 @@ LOGGING = {
         'file': {
             'level': 'INFO',
             'class': 'logging.FileHandler',
-            'filename': BASE_DIR / 'requests.log',
+            'filename': LOG_PATH / 'requests.log',
             'formatter': 'base_formatter',
         },
         'mail_info': {
