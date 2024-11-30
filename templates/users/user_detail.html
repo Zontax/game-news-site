@@ -28,15 +28,11 @@
                             </text> 
                             <i class="bi bi-arrow-right-short"></i> 
                             <text class="text-muted">{{ detail_user.username }}</text>
-
-                            {% if detail_user.is_authenticated  %}
-                                <text title="В мережі"> 🟢</text>
-                            {% endif %}
                         </h5>
 
-                        <div class="bio">
-                            {% if detail_user.profile.bio %}
-                                {{ detail_user.profile.bio|linebreaks }}
+                        <div class="description">
+                            {% if detail_user.profile.description %}
+                                {{ detail_user.profile.description|linebreaks }}
                             {% endif %}
                         </div>
 

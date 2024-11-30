@@ -2,9 +2,7 @@
 
 ### Run 
 ```bash
-cd..
 .venv\Scripts\activate
-cd game-news-site
 py manage.py runserver 0.0.0.0:8024 --settings=app.settings.local
 ```
 

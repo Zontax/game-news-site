@@ -125,15 +125,15 @@
                     </div>
 
                     <div class="col-md-12 mb-3">
-                        <label for="id_bio" class="form-label">Опис</label>
+                        <label for="id_description" class="form-label">Опис</label>
                         <textarea class="form-control" 
-                            id="id_bio" 
-                            name="bio" 
-                            placeholder="Опишіть себе">{{ profile_form.bio.value|default:'' }}</textarea>
-                    
-                        {% if profile_form.bio.errors %}
+                            id="id_description" 
+                            name="description" 
+                            placeholder="Опис профілю">{{ profile_form.description.value|default:'' }}</textarea>
+
+                        {% if profile_form.description.errors %}
                             <div class="alert alert-danger alert-dismissible fade show">
-                                {{ profile_form.bio.errors }}</div>
+                                {{ profile_form.description.errors }}</div>
                         {% endif %}
                     </div>
                 </div>

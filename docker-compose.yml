@@ -1,19 +1,20 @@
 services:
     web:
-        container_name: django
+        container_name: game-news-django
         build: .
-        command: gunicorn app.wsgi:application --bind 0.0.0.0:8024 --preload --workers 4 --threads 4 --env DJANGO_SETTINGS_MODULE=app.settings.local
+        command: gunicorn src.core.wsgi:application --bind 0.0.0.0:8024 --preload --workers 4 --threads 4 --env DJANGO_SETTINGS_MODULE=src.core.settings.local
         volumes:
-            - static_volume:/app/staticfiles
+            - static_content:/app/staticfiles
             - media_content:/app/media
         ports:
-            - 8024:8024
+            - 8030:8030
         depends_on:
-            - postgres_db
+            - db
+            - redis
         env_file: ./.env
 
-    postgres_db:
-        container_name: postgres
+    db:
+        container_name: game-news-postgres
         image: postgres:16.3-alpine3.20
         restart: always
         healthcheck:
@@ -22,14 +23,15 @@ services:
             timeout: 5s
             retries: 5
         ports:
-            - 5433:5432
+            - 5434:5432
         volumes:
             - postgres_data:/var/lib/postgresql/data
         env_file: ./.env.database
 
     redis:
-        container_name: redis
+        container_name: game-news-redis
         image: redis:alpine
+        command: redis-server --appendonly yes
         restart: always
         ports:
             - 6379:6379
@@ -38,18 +40,31 @@ services:
             - /home/user/redis/redis.conf:/usr/local/etc/redis/redis.conf
         env_file: ./.env.redis
 
+    celery:
+        container_name: game-news-celery
+        build:
+            context: .
+        command: >
+            sh -c "celery -A core.celery worker --pool=solo --loglevel=info"
+        volumes:
+            - .:/app
+        depends_on:
+            - redis
+            - db
+        env_file: ./.env
+
     nginx:
-        container_name: nginx
+        container_name: game-news-nginx
         build: ./nginx
         ports:
-            - 1337:80
+            - 1338:8000
         volumes:
-            - static_volume:/app/staticfiles
+            - static_content:/app/staticfiles
         depends_on:
             - web
 
 volumes:
-    postgres_data:
-    static_volume:
+    static_content:
     media_content:
+    postgres_data:
     redis_data:
