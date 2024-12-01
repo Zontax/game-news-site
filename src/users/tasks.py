@@ -1,5 +1,4 @@
 from django.core.mail import send_mail
-
 from celery import shared_task
 from core.settings.base import EMAIL_HOST_USER
 from users.models import User
@@ -17,7 +16,7 @@ def celery_clear_user_token(user_id):
 
 
 @shared_task
-def celery_send_mail(subject, message, html_message, to_email, fail_silently):
+def celery_send_email(subject, message, html_message, to_email, fail_silently=False):
     try:
         send_mail(
             subject=subject,
@@ -27,5 +26,5 @@ def celery_send_mail(subject, message, html_message, to_email, fail_silently):
             recipient_list=[to_email],
             fail_silently=fail_silently)
         return 'ok'
-    except:
+    except Exception as e:
         return 'error'

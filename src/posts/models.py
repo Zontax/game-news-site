@@ -1,16 +1,10 @@
-from django.db.models import Model, Manager, Index, PositiveSmallIntegerField, CharField, SlugField, BooleanField, TextField, ImageField, DateTimeField, ForeignKey, ManyToManyField
-from django.db.models.signals import post_migrate, pre_delete
-from django.db.models import SET_NULL, CASCADE
-from django.utils.timezone import now
-from django.dispatch import receiver
+from django.db.models import Model, Manager, Index, PositiveSmallIntegerField, CharField, SlugField, BooleanField, TextField, ImageField, DateTimeField, ForeignKey, ManyToManyField, SET_NULL, CASCADE
 from django.urls import reverse
 from django.contrib import admin
-
-from core.settings.base import MEDIA_ROOT
-from users.models import User
-from colorfield.fields import ColorField
+from django.utils.timezone import now
 from django_ckeditor_5.fields import CKEditor5Field
-import os
+from colorfield.fields import ColorField
+from users.models import User
 
 
 class PostType(Model):
@@ -139,7 +133,7 @@ class Post(Model):
     class Meta():
         db_table = 'posts'
         verbose_name = 'Публікація'
-        verbose_name_plural = '🟩 Публікації'
+        verbose_name_plural = 'Публікації'
         ordering = ['-created_date']
         indexes = [Index(fields=['-created_date', 'slug'])]
 
@@ -156,7 +150,7 @@ class Post(Model):
     @admin.display(description='Мінуси')
     def total_dislikes(self):
         return self.dislikes.count()
-    
+
     @admin.display(description='В збережених')
     def total_saves(self):
         return self.saves.count()
@@ -172,9 +166,8 @@ class PostCommentActiveManager(Manager):
 
 
 class PostComment(Model):
-    """
-    Модель коментарів до публікацій.
-    """
+    """Модель коментарів до публікацій."""
+
     post = ForeignKey(Post, CASCADE, related_name='comments',
                       null=True, blank=True, verbose_name='Пост')
     user = ForeignKey(User, CASCADE, related_name='comments',
@@ -215,50 +208,3 @@ class PostComment(Model):
     @admin.display(description='Мінуси')
     def total_dislikes(self):
         return self.dislikes.count()
-
-
-@receiver(pre_delete, sender=Post)
-def delete_post(sender, instance: Post, **kwargs):
-    instance.tags.clear()
-    instance.topics.clear()
-    instance.likes.clear()
-    instance.dislikes.clear()
-    instance.saves.clear()
-
-    if instance.image:
-        image_path = MEDIA_ROOT / instance.image.path
-        if os.path.exists(image_path):
-            os.remove(image_path)
-
-
-@receiver(post_migrate)
-def create_default_post_type_and_topic(sender, **kwargs):
-    if not PostType.objects.exists():
-        PostType.objects.create(
-            name='Новини',
-            name_plural='Новина',
-            slug='news',
-            description='Новини зі світу відеоігор та технологій',
-        )
-
-    if not PostTopic.objects.exists():
-        PostTopic.objects.create(
-            name='Ігрова індустрія',
-            slug='igrova-industriya',
-            description="Усі публікації пов'язані з усією ігровою індустрією",
-        )
-
-
-# class PostTopicRelation(Model):
-#     post = ForeignKey(Post, CASCADE)
-#     topic = ForeignKey(PostTopic, CASCADE)
-
-#     class Meta:
-#         db_table = 'posts_topics'
-
-# class PostTagRelation(Model):
-#     post = ForeignKey(Post, CASCADE)
-#     tag = ForeignKey(PostTag, CASCADE)
-
-#     class Meta:
-#         db_table = 'posts_tags'

@@ -1,17 +1,26 @@
+import logging
+from django.conf import settings
 from django.contrib import admin
-from django.http import HttpRequest
+from django.http import HttpRequest, HttpResponseRedirect
 from django.utils.html import format_html
-from admin_extra_buttons.api import ExtraButtonsMixin, button, confirm_action, link, view
-from admin_extra_buttons.utils import HttpResponseRedirectToReferrer
+from django.db.models import ImageField
+from admin_extra_buttons.api import ExtraButtonsMixin, button, confirm_action
+from image_uploader_widget.widgets import ImageUploaderWidget
 from main.admin import CustomAdmin
 from main.services import get_admin_html_image
 from users.models import Subscribe, User, Profile
+from users.tasks import celery_send_email
+
+
+logger = logging.getLogger(__name__)
 
 
 class ProfileInline(admin.StackedInline):
     model = Profile
     can_delete = False
-    verbose_name_plural = 'Профілі'
+    formfield_overrides = {
+        ImageField: {'widget': ImageUploaderWidget},
+    }
 
 
 @admin.register(User)
@@ -43,34 +52,29 @@ class UserAdmin(ExtraButtonsMixin, CustomAdmin):
             return format_html(
                 get_admin_html_image(obj.profile.avatar.url, obj, 'Переглянути профіль'))
 
-    @button(visible=lambda self: self.context['request'].user.is_superuser,
-            change_form=True,
-            html_attrs={'style': 'background:#16941a;'})
-    def refresh(self, request: HttpRequest):
-        self.message_user(request, 'refresh called')
-        return HttpResponseRedirectToReferrer(request)
+    @button(
+        visible=lambda self: self.context['request'].user.is_superuser,
+        html_attrs={'style': 'background-color:#DC6C6C;color:black'})
+    def send_email(self, request):
+        def _action(request):
+            email = self.get_object(request)
+            logger.info(email)
+            subject = f'{settings.APP_NAME} - Повідомлення'
+            message = 'Це тестове повідомлення з адміністративної панелі'
+            html_message = f'<h1>{message}</h1>'
+            # celery_send_email.delay(subject, message, html_message, email, False)
+            return HttpResponseRedirect(request.META.get('HTTP_REFERER', '/admin/'))
 
-
-@admin.register(Profile)
-class ProfileAdmin(CustomAdmin):
-    list_display = ['user', 'display_avatar', 'phone_number']
-    list_display_links = ['user']
-    search_fields = ['user', 'phone_number']
-    list_filter = ['user']
-    readonly_fields = ['user']
-    raw_id_fields = ['user']
-    list_per_page = 20
-
-    fields = [
-        'user',
-        'description',
-        ('phone_number', 'date_of_birth'),
-        ('avatar', 'profile_bg')
-    ]
-
-    def display_avatar(self, obj: Profile):
-        if obj.avatar and obj.avatar.url:
-            return format_html(get_admin_html_image(obj.avatar.url, obj, 'Переглянути профіль'))
+        return confirm_action(
+            modeladmin=self,
+            request=request,
+            action=_action,
+            title='Надіслати email',
+            message='Ви впевнені, що хочете надіслати електронний лист користувачеві?',
+            success_message='Лист було успішно надіслано',
+            error_message='Сталася помилка при надсиланні листа',
+            description='Ця дія відправить лист власнику цього запису'
+        )
 
 
 @admin.register(Subscribe)

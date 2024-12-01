@@ -1,13 +1,11 @@
 from django.db.models import Model, Index, ForeignKey, ManyToManyField, CharField, TextField, ImageField, DateField, DateTimeField, EmailField, OneToOneField, CASCADE
+from django.urls import reverse
+from django.dispatch import receiver
+from django.utils.translation import gettext_lazy as _
 from django.db.models.signals import post_save
 from django.contrib.auth.models import AbstractUser
 from django.contrib.auth.validators import ASCIIUsernameValidator
 from django.core.validators import MinLengthValidator
-from django.utils.translation import gettext_lazy as _
-from django.dispatch import receiver
-from django.urls import reverse
-
-from core.settings.base import AUTH_USER_MODEL
 from phonenumber_field.modelfields import PhoneNumberField
 
 
@@ -27,12 +25,13 @@ class User(AbstractUser):
         _('Username'),
         max_length=40,
         unique=True,
-        help_text=_(
-            'Required. 40 characters or fewer. Letters, digits and @/./+/-/_ only.'),
-        validators=[ASCIIUsernameValidator(), MinLengthValidator(3)],
-        error_messages={'unique': _(
-            'A user with that username already exists.'), },
-    )
+        help_text=_('Тільки символи @/./+/-/_'),
+        validators=[ASCIIUsernameValidator(), MinLengthValidator(2)],
+        error_messages={'unique': _('Користувач з таким ім\'ям користувача вже існує')})
+    first_name = CharField(
+        _('first name'),
+        max_length=40,
+        validators=[MinLengthValidator(2)])
     email = EmailField('Пошта Email', unique=True)
     activation_key = CharField('Секретний код', max_length=80,
                                blank=True, null=True)
@@ -44,20 +43,21 @@ class User(AbstractUser):
     class Meta():
         db_table = 'users'
         verbose_name = 'Користувач'
-        verbose_name_plural = '🔴 Користувачі'
+        verbose_name_plural = 'Користувачі'
         ordering = ['date_joined']
 
     def __str__(self):
-        return self.username
+        return self.get_full_name()
 
     def get_absolute_url(self):
         return reverse('user:detail', args=[self.username])
 
 
 class Profile(Model):
-    user = OneToOneField(AUTH_USER_MODEL, on_delete=CASCADE,
+    user = OneToOneField(User, on_delete=CASCADE,
                          related_name='profile', verbose_name='Користувач')
-    description = TextField('Опис профілю', max_length=500, blank=True, null=True)
+    description = TextField('Опис профілю', max_length=500,
+                            blank=True, null=True)
     phone_number = PhoneNumberField('Номер телефону', region='UA',
                                     blank=True, null=True)
     date_of_birth = DateField('День народження', blank=True, null=True)
@@ -73,14 +73,11 @@ class Profile(Model):
     class Meta():
         db_table = 'profiles'
         verbose_name = 'Профіль'
-        verbose_name_plural = '🟥 Профілі'
+        verbose_name_plural = 'Профілі'
         ordering = ['user__date_joined']
 
     def __str__(self):
-        return f'Профіль ({self.user.username})'
-
-    def get_absolute_url(self):
-        return reverse('user:detail', args=[self.user.username])
+        return self.user.get_full_name()
 
 
 class Subscribe(Model):

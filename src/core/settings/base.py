@@ -40,18 +40,16 @@ if DEBUG_TOOLBAR:
 INSTALLED_APPS += [
     'rest_framework',
     'drf_spectacular',
-    'compressor',
     'django_extensions',
+    'admin_extra_buttons',
+    'social_django',
+    'django_celery_beat',
+    'django_celery_results',
     'colorfield',
     'phonenumber_field',
     'django_recaptcha',
     'django_ckeditor_5',
-    'django_bootstrap5',
-    'gm2m',
-    'social_django',
-    'admin_extra_buttons',
-    'django_celery_beat',
-    'django_celery_results',
+    'image_uploader_widget',
 ]
 
 MIDDLEWARE = [
@@ -136,8 +134,17 @@ STATIC_URL = '/static/'
 STATIC_ROOT = BASE_DIR / 'staticfiles'
 STATICFILES_DIRS = (BASE_DIR / 'static',)
 
+REDIS_HOST = env.str('REDIS_HOST')
+REDIS_PORT = env.int('REDIS_PORT')
+REDIS_DB = env.int('REDIS_DB')
+REDIS_URL = f'redis://{REDIS_HOST}:{REDIS_PORT}/{REDIS_DB}'
+
 CACHES = {
     'default': {
+        'BACKEND': 'django.core.cache.backends.redis.RedisCache',
+        'LOCATION': REDIS_URL
+    },
+    'filebased': {
         'BACKEND': 'django.core.cache.backends.filebased.FileBasedCache',
         'LOCATION': BASE_DIR / 'media/cache',
     }
@@ -239,18 +246,6 @@ SOCIAL_AUTH_PIPELINE = [
 RECAPTCHA_PUBLIC_KEY = env.str('RECAPTCHA_PUBLIC_KEY')
 RECAPTCHA_PRIVATE_KEY = env.str('RECAPTCHA_PRIVATE_KEY')
 RECAPTCHA_DOMAIN = env.str('RECAPTCHA_DOMAIN')
-
-# Custom vars
-SITE_ID = 1
-APP_NAME = env.str('APP_NAME', 'Site')
-SITE_SUPPORT_EMAIL = env.str('SITE_SUPPORT_EMAIL')
-ADMINS = [(APP_NAME, EMAIL_HOST_USER)]
-POSTS_IN_PAGE = env.int('POSTS_IN_PAGE')
-MIN_USER_AGE = env.int('MIN_USER_AGE')
-
-REDIS_HOST = env.str('REDIS_HOST')
-REDIS_PORT = env.int('REDIS_PORT')
-REDIS_DB = env.int('REDIS_DB')
 
 CELERY_TIMEZONE = env.str('TIME_ZONE')
 CELERY_BROKER_URL = env.str('CELERY_BROKER_URL')
@@ -383,3 +378,12 @@ CKEDITOR_5_CONFIGS = {
         }
     },
 }
+
+# Custom vars
+SITE_ID = 1
+APP_NAME = env.str('APP_NAME')
+DOMAIN = env.str('DOMAIN')
+SITE_SUPPORT_EMAIL = env.str('SITE_SUPPORT_EMAIL')
+ADMINS = [(APP_NAME, EMAIL_HOST_USER)]
+POSTS_IN_PAGE = env.int('POSTS_IN_PAGE')
+MIN_USER_AGE = env.int('MIN_USER_AGE')

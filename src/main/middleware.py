@@ -1,11 +1,12 @@
-from django.utils.translation import get_language
-from django.utils import timezone
-from django.http import HttpRequest
-
-from user_agents import parse
 import logging
+from django.utils.translation import get_language
+from django.http import HttpRequest
+from django.utils import timezone
+from user_agents import parse
+from core.settings.base import LOG_PATH
 
-logging.basicConfig(filename='logs/detail.log', level=logging.INFO)
+
+logging.basicConfig(filename=LOG_PATH / 'detail.log', level=logging.INFO)
 logger = logging.getLogger()
 
 
@@ -29,7 +30,5 @@ class PrintRequestInfoMiddleware:
         logger.info(f'Timezone: {user_timezone}')
         logger.info(f'Device: {device_type}')
         logger.info(f'Browser: {browser_info}')
-
         response = self._get_response(request)
-
         return response

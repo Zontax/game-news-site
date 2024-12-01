@@ -12,6 +12,7 @@ from core.settings.base import EMAIL_HOST_USER, APP_NAME, MEDIA_ROOT
 from main.services import create_random_image
 from users.models import Profile, Subscribe, User
 from users.forms import UserEditForm, ProfileEditForm, UserLoginForm, UserRegisterForm, ResetTokenForm, ResetPasswordForm, SetNewPasswordForm
+from users.tasks import celery_send_email
 from users.services import generate_token
 from posts.models import Post
 
@@ -31,7 +32,7 @@ class UserRegisterView(FormView):
             activation_url = self.request.build_absolute_uri(
                 reverse_lazy('user:register_confirm', kwargs={'token': token}))
 
-            # celery_send_mail.delay(subject, message, html_message, email, False)
+            # celery_send_email.delay(subject, message, html_message, email, False)
             
             send_mail(
                 subject=f'Код активації акаунта ({APP_NAME})',
@@ -180,7 +181,7 @@ class PasswordResetView(FormView):
                 <h2>Відновлення паролю на сайті ({APP_NAME})</h2>
                 <p>Щоб відновити пароль перейдіть за посиланням: {reset_url}</p>
             """
-            # celery_send_mail.delay(subject, message, html_message, email, False)
+            celery_send_email.delay(subject, message, html_message, email, False)
 
             send_mail(
                 subject=subject,

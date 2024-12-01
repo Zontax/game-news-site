@@ -38,4 +38,4 @@ def create_profile_and_add_avatar(backend, user: User, *args, **kwargs):
             url = response['picture']
             response = requests.get(url)
             profile.avatar.save(f'{user.username}.jpg',
-                                ContentFile(response.content), save=True)
+                                ContentFile(response.content))

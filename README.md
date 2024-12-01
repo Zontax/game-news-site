@@ -3,7 +3,7 @@
 ### Run 
 ```bash
 .venv\Scripts\activate
-py manage.py runserver 0.0.0.0:8024 --settings=core.settings.local
+py src/manage.py runserver 0.0.0.0:8024
 ```
 
 ## Pet project (Python Django 4.2.11)
@@ -46,7 +46,6 @@ py -m pip install django-ckeditor-5      # Заповлення формат�
 py -m pip install beautifulsoup4         # Для видалення тегів html з текста
 py -m pip install django-filebrowser     # Файловий менеджер проекта для адмінки
 py -m pip install django-compressor      # робота з css scss sass
-py -m pip install django-bootstrap5      # стилі bootstrap 5
 py -m pip install django-admin-interface # стилі для адмінки
 py -m pip install django-gm2m            # функціонал для полів m2m
 py -m pip install django-cities-light    # всі міста

@@ -1,3 +1,4 @@
+import os
 import uuid
 import random
 import logging
@@ -21,6 +22,7 @@ from posts.models import Post, PostType, PostTag, PostTopic, PostComment
 from posts.services import post_search
 
 
+logger = logging.getLogger(__name__)
 person = Person('uk')
 text = Text('uk')
 datetime_gen = Datetime('uk')
@@ -28,8 +30,6 @@ ua_provider = UkraineSpecProvider()
 tab_text1 = text.text(1)
 tab_text2 = text.text(2)
 tab_text3 = text.text(4)
-
-logger = logging.getLogger(__name__)
 
 
 class TestHtmxAPIView(APIView):
@@ -221,44 +221,44 @@ def is_admin(user):
     return user.is_superuser
 
 
-# @method_decorator(user_passes_test(is_admin), name='dispatch')
 class FakePostCreateAPIView(APIView):
-    """
-    API endpoint, який створює публікації для тестування роботи сайту.
-    """
     permission_classes = [IsAdminUser]
 
-    def get(self, request: HttpRequest, count=2):
+    def get(self, request: HttpRequest, count: int = 2):
         try:
             for i in range(count):
                 uid = uuid.uuid4().hex
                 date = datetime.now()
                 year = date.year
-                month = date.month
-                day = date.day
-
-                if day < 10:
-                    day = f'0{day}'
-                if month < 10:
-                    month = f'0{month}'
+                month = f"{date.month:02d}"
+                day = f"{date.day:02d}"
 
                 image_path = f'images/posts/{year}/{month}/{day}/{uid}.png'
-                create_random_image(MEDIA_ROOT / image_path)
-                print(MEDIA_ROOT / image_path)
+                full_image_path = MEDIA_ROOT / image_path
 
-                title = f'{text.title()[:80]} {uid}'[:130]
+                os.makedirs(full_image_path.parent, exist_ok=True)
+                create_random_image(full_image_path)
+
+                post_types = list(PostType.objects.all())
+                if not post_types:
+                    return Response({'message': 'Немає типів постів у базі даних'}, status=500)
+                type = random.choice(post_types)
+
+                users = list(User.objects.all())
+                if not users:
+                    return Response({'message': 'Немає користувачів у базі даних'}, status=500)
+                user = random.choice(users)
+
+                title = f'Фейковий пост {uid}'[:130]
                 slug = slugify(f'{uid}')[:130]
-                content = f'{text.text(20)}\nfake post'
+                content = f'Фейковий контент {uid}'
 
                 r_days = random.randint(-3, 3)
                 r_hours = random.randint(-12, 12)
                 r_date = timezone.now() + timedelta(days=r_days, hours=r_hours)
 
-                type = random.choice(PostType.objects.all())
-
-                # Create fake post
                 post = Post.objects.create(
-                    user=random.choice(User.objects.all()[1:]),
+                    user=user,
                     type=type,
                     title=title,
                     slug=slug,
@@ -267,29 +267,31 @@ class FakePostCreateAPIView(APIView):
                     created_date=r_date,
                 )
 
-                if type.id == 2:
+                if type.slug == 'reviews':
                     post.review_rating = random.randint(10, 98)
-                    post.review_pluses = text.title()
-                    post.review_minuses = text.title()
+                    post.review_pluses = 'Плюси: гарний дизайн'
+                    post.review_minuses = 'Мінуси: висока ціна'
                     post.save()
 
-                # Create fake comments
-                for i in range(random.randint(1, 5)):
+                for _ in range(random.randint(1, 5)):
                     PostComment.objects.create(
                         post=post,
-                        user=random.choice(User.objects.all()[1:]),
-                        text=text.title(),
+                        user=user,
+                        text='Це тестовий коментар.',
                         created_date=r_date,
                     )
 
-                # Add topics and tags
-                for i in range(2):
-                    topic = random.choice(PostTopic.objects.all())
-                    post.topics.add(topic)
+                # Додавання тем, якщо вони є
+                topics = list(PostTopic.objects.all())
+                if topics:
+                    for _ in range(2):
+                        post.topics.add(random.choice(topics))
 
-                for i in range(6):
-                    tag = random.choice(PostTag.objects.all())
-                    post.tags.add(tag)
+                # Додавання тегів, якщо вони є
+                tags = list(PostTag.objects.all())
+                if tags:
+                    for _ in range(6):
+                        post.tags.add(random.choice(tags))
 
             serializer = PostDetailSerializer(post)
             return Response(serializer.data)
@@ -300,7 +302,7 @@ class FakePostCreateAPIView(APIView):
                 'error': str(e)
             }
             logger.error(e)
-            return Response(data, 500)
+            return Response(data, status=500)
 
 
 class CheckUsernameAPIView(APIView):
@@ -313,7 +315,7 @@ class CheckUsernameAPIView(APIView):
 
         if username.__len__() == 0:
             return HttpResponse()
-        elif username.__len__() < 3:
+        elif username.__len__() < 2:
             return HttpResponse(f"<div id='check-username' class='form-error'>Закоротке ім'я {username.__len__()}</div>")
 
         if User.objects.filter(username=username).exists():

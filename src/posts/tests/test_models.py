@@ -29,7 +29,7 @@ class TestPostsModels(TestCase):
         post_type1.save()
 
         post_type2 = PostType(
-            name='Test Guides',
+            name='Test Guide',
             name_plural='Test Guides',
             slug='test-guides')
         post_type2.save()
