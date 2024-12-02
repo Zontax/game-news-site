@@ -7,13 +7,17 @@ from django.shortcuts import get_object_or_404, render, redirect
 from django.urls import reverse, reverse_lazy
 from django.views.generic import DetailView, FormView
 from django.views import View
-from core.settings.base import APP_NAME, MEDIA_ROOT, TOKEN_LIFETIME
+from redis import Redis
+from core.settings.base import APP_NAME, MEDIA_ROOT, TOKEN_LIFETIME, REDIS_HOST, REDIS_PORT, REDIS_DB
 from main.services import create_random_image
 from users.models import Profile, Subscribe, User
 from users.forms import UserEditForm, ProfileEditForm, UserLoginForm, UserRegisterForm, ResetTokenForm, ResetPasswordForm, SetNewPasswordForm
 from users.tasks import send_to_email, clear_user_token
 from users.services import generate_token
 from posts.models import Post
+
+
+redis = Redis(REDIS_HOST, REDIS_PORT, REDIS_DB)
 
 
 class UserRegisterView(FormView):
@@ -145,7 +149,6 @@ class RegisterConfirmView(View):
         image_path = f'images/users/{user.id}/avatar/{user.username}.png'
         create_random_image(MEDIA_ROOT / image_path)
         user.profile.avatar = image_path
-
         user.save()
 
         auth.login(request, user, 'django.contrib.auth.backends.ModelBackend')
@@ -162,14 +165,12 @@ class PasswordResetView(FormView):
     def form_valid(self, form: ResetPasswordForm):
         email = form.cleaned_data['email']
         user = User.objects.filter(email=email).first()
+        token = generate_token()
 
         if user:
-            token = generate_token()
-            user.activation_key = token
-            user.save()
-            reset_url = self.request.build_absolute_uri(
-                reverse_lazy('user:password_reset_confirm', kwargs={'token': token}))
-
+            redis.set(f'reset_user_token:{user.pk}', token, ex=TOKEN_LIFETIME)
+            reset_url = self.request.build_absolute_uri(reverse_lazy(
+                'user:password_reset_confirm', kwargs={'token': token}))
             subject = f'Відновлення паролю на сайті ({APP_NAME})'
             message = f'({APP_NAME}) Щоб відновити пароль перейдіть за посиланням: {reset_url}'
             html_message = f"""
@@ -177,7 +178,6 @@ class PasswordResetView(FormView):
                 <p>Щоб відновити пароль перейдіть за посиланням: {reset_url}</p>
             """
             send_to_email.delay(subject, message, html_message, email, False)
-            clear_user_token.apply_async((user.pk,), countdown=TOKEN_LIFETIME)
 
             messages.success(
                 self.request, 'Перевірте свою електронну пошту для відновлення паролю.')
@@ -208,8 +208,8 @@ class PasswordResetConfirmView(FormView):
         token = self.kwargs.get('token')
         user = self.get_user_by_token(token)
         if user:
+            redis.delete(f'reset_user_token:{user.pk}')
             user.set_password(form.cleaned_data['password1'])
-            user.activation_key = None
             user.is_active = True
             user.save()
             messages.success(
@@ -220,10 +220,18 @@ class PasswordResetConfirmView(FormView):
         return super().form_valid(form)
 
     def get_user_by_token(self, token):
-        try:
-            return User.objects.get(activation_key=token)
-        except User.DoesNotExist:
-            return None
+        for user_pk in redis.keys('reset_user_token:*'):
+            stored_token = redis.get(user_pk)
+
+            if stored_token.decode() == token:
+                user_pk: str = user_pk.decode()
+                user_pk_value = int(user_pk.split(':')[1])
+
+                try:
+                    return User.objects.get(pk=user_pk_value)
+                except User.DoesNotExist:
+                    return None
+        return None
 
 
 class ProfileDetailView(DetailView):

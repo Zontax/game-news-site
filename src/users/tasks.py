@@ -1,5 +1,7 @@
+from django.core.cache import cache
 from django.core.mail import send_mail
 from celery import shared_task
+from redis import Redis
 from core.settings.base import EMAIL_HOST_USER
 from users.models import User
 

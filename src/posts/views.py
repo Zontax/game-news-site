@@ -5,23 +5,19 @@ from django.urls import reverse
 from django.template.response import TemplateResponse
 from django.contrib.auth.mixins import LoginRequiredMixin
 from django.contrib import messages
+from django.core.cache import cache
 from django.core.paginator import Paginator, EmptyPage, PageNotAnInteger
 from django.views.generic import View, DetailView
 from rest_framework.permissions import IsAuthenticated
 from rest_framework.views import APIView
+from redis import Redis
 from core.settings.base import POSTS_IN_PAGE, REDIS_HOST, REDIS_PORT, REDIS_DB
 from posts.forms import CreatePostCommentForm
 from posts.models import Post, PostType, PostTopic, PostTag, PostComment
 from posts.services import post_search
-from redis import Redis
-import logging
-
-logger = logging.getLogger(__name__)
 
 
-redis = Redis(host=REDIS_HOST,
-              port=REDIS_PORT,
-              db=REDIS_DB)
+redis = Redis(REDIS_HOST, REDIS_PORT, REDIS_DB)
 
 
 class PostListView(View):
