@@ -3,16 +3,15 @@ from django.db.models import Count
 from django.contrib.auth.mixins import LoginRequiredMixin
 from django.contrib.auth.views import LoginView
 from django.contrib import auth, messages
-from django.core.mail import send_mail
 from django.shortcuts import get_object_or_404, render, redirect
 from django.urls import reverse, reverse_lazy
 from django.views.generic import DetailView, FormView
 from django.views import View
-from core.settings.base import EMAIL_HOST_USER, APP_NAME, MEDIA_ROOT
+from core.settings.base import APP_NAME, MEDIA_ROOT, TOKEN_LIFETIME
 from main.services import create_random_image
 from users.models import Profile, Subscribe, User
 from users.forms import UserEditForm, ProfileEditForm, UserLoginForm, UserRegisterForm, ResetTokenForm, ResetPasswordForm, SetNewPasswordForm
-from users.tasks import celery_send_email
+from users.tasks import send_to_email, clear_user_token
 from users.services import generate_token
 from posts.models import Post
 
@@ -32,18 +31,13 @@ class UserRegisterView(FormView):
             activation_url = self.request.build_absolute_uri(
                 reverse_lazy('user:register_confirm', kwargs={'token': token}))
 
-            # celery_send_email.delay(subject, message, html_message, email, False)
-            
-            send_mail(
-                subject=f'Код активації акаунта ({APP_NAME})',
-                message=f'({APP_NAME}) Код активації акаунта: {token}',
-                html_message=f"""
+            subject = f'Код активації акаунта ({APP_NAME})'
+            message = f'({APP_NAME}) Код активації акаунта: {token}'
+            html_message = f"""
                     <h2>Код активації акаунта ({APP_NAME})</h2>
                     <p>Код: <b>{token}</b></p>
-                    <p>або перейдіть за посиланням <a href="{activation_url}">{activation_url}</a></p>""",
-                from_email=EMAIL_HOST_USER,
-                recipient_list=[email],
-                fail_silently=False)
+                    <p>або перейдіть за посиланням <a href="{activation_url}">{activation_url}</a></p>"""
+            send_to_email.delay(subject, message, html_message, email, False)
 
             user.is_active = False
             user.activation_key = token
@@ -52,7 +46,8 @@ class UserRegisterView(FormView):
             user.username = form.cleaned_data['username']
             user.set_password(form.cleaned_data['password1'])
             user.save()
-            # clear_activation_key.apply_async((user.pk,), countdown=300)
+
+            clear_user_token.apply_async((user.pk,), countdown=TOKEN_LIFETIME)
 
         messages.success(self.request,
                          'На ваш email надіслано лист з посиланням для підтвердження акаунта')
@@ -143,19 +138,19 @@ class RegisterConfirmView(View):
         except Exception:
             messages.error(request, 'Помилка активації')
             return redirect('user:reset_wait')
-        
+
         user.is_active = True
         user.activation_key = None
 
         image_path = f'images/users/{user.id}/avatar/{user.username}.png'
         create_random_image(MEDIA_ROOT / image_path)
         user.profile.avatar = image_path
-        
+
         user.save()
 
         auth.login(request, user, 'django.contrib.auth.backends.ModelBackend')
         messages.success(request, 'Ви успішно зареєструвались')
-        
+
         return redirect('user:profile')
 
 
@@ -181,15 +176,8 @@ class PasswordResetView(FormView):
                 <h2>Відновлення паролю на сайті ({APP_NAME})</h2>
                 <p>Щоб відновити пароль перейдіть за посиланням: {reset_url}</p>
             """
-            celery_send_email.delay(subject, message, html_message, email, False)
-
-            send_mail(
-                subject=subject,
-                message=message,
-                html_message=html_message,
-                from_email=EMAIL_HOST_USER,
-                recipient_list=[email],
-                fail_silently=False)
+            send_to_email.delay(subject, message, html_message, email, False)
+            clear_user_token.apply_async((user.pk,), countdown=TOKEN_LIFETIME)
 
             messages.success(
                 self.request, 'Перевірте свою електронну пошту для відновлення паролю.')
@@ -253,7 +241,7 @@ class ProfileDetailView(DetailView):
             'title': user.username,
             'detail_user': user,
             'posts': posts,
-            'total_followers': total_followers, 
+            'total_followers': total_followers,
             'followers': followers,
         }
         return render(request, 'users/user_detail.html', context)
@@ -272,25 +260,29 @@ class SubscribeToProfileView(View):
                 user_to: Profile = User.objects.get(id=user_id).profile
 
                 if user_from == user_to:
-                    messages.error(request, f'Ви не можете підписатися на себе')
+                    messages.error(
+                        request, f'Ви не можете підписатися на себе')
                     return HttpResponseRedirect(reditect_back)
 
                 if action == 'follow':
                     Subscribe.objects.get_or_create(
                         user_from=user_from,
                         user_to=user_to)
-                    messages.success(request, f'Ви стежите за ({user_to.user.get_full_name()})')
+                    messages.success(
+                        request, f'Ви стежите за ({user_to.user.get_full_name()})')
                 else:
                     Subscribe.objects.filter(
                         user_from=user_from,
                         user_to=user_to).delete()
-                    messages.success(request, f'Ви відписалися від ({user_to.user.get_full_name()})')
-                
+                    messages.success(
+                        request, f'Ви відписалися від ({user_to.user.get_full_name()})')
+
                 return HttpResponseRedirect(reditect_back)
-                
+
             except User.DoesNotExist or Profile.DoesNotExist:
-                messages.error(request, 'Помилка. Такого користувача не знайдено')
+                messages.error(
+                    request, 'Помилка. Такого користувача не знайдено')
                 return redirect('main:index')
-        
+
         messages.error(request, 'Помилка...')
         return HttpResponseRedirect(reditect_back)

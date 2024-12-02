@@ -9,7 +9,7 @@ from image_uploader_widget.widgets import ImageUploaderWidget
 from main.admin import CustomAdmin
 from main.services import get_admin_html_image
 from users.models import Subscribe, User, Profile
-from users.tasks import celery_send_email
+from users.tasks import send_to_email
 
 
 logger = logging.getLogger(__name__)
@@ -62,7 +62,7 @@ class UserAdmin(ExtraButtonsMixin, CustomAdmin):
             subject = f'{settings.APP_NAME} - Повідомлення'
             message = 'Це тестове повідомлення з адміністративної панелі'
             html_message = f'<h1>{message}</h1>'
-            # celery_send_email.delay(subject, message, html_message, email, False)
+            send_to_email.delay(subject, message, html_message, email, False)
             return HttpResponseRedirect(request.META.get('HTTP_REFERER', '/admin/'))
 
         return confirm_action(

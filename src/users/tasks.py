@@ -5,7 +5,7 @@ from users.models import User
 
 
 @shared_task
-def celery_clear_user_token(user_id):
+def clear_user_token(user_id):
     try:
         user = User.objects.get(pk=user_id)
         user.activation_key = None
@@ -16,7 +16,7 @@ def celery_clear_user_token(user_id):
 
 
 @shared_task
-def celery_send_email(subject, message, html_message, to_email, fail_silently=False):
+def send_to_email(subject, message, html_message, to_email, fail_silently=False):
     try:
         send_mail(
             subject=subject,
