@@ -136,6 +136,10 @@ GitHub.sublime-settings
 #!.vscode/extensions.json 
 .history
 
+# AI integration
+.geminiignore
+GEMINI.md
+
 # This Project
 .env
 .env.prod
