@@ -141,10 +141,7 @@ GitHub.sublime-settings
 GEMINI.md
 
 # This Project
-.env
-.env.prod
-.env.database
-.env.redis
+.env.*
 entrypoint.prod.sh
 docker-compose.prod.yml
 Dockerfile.prod
