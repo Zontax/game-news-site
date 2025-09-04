@@ -39,6 +39,7 @@ if DEBUG_TOOLBAR:
 
 INSTALLED_APPS += [
     'rest_framework',
+    'rest_framework.authtoken',
     'drf_spectacular',
     'django_extensions',
     'admin_extra_buttons',
@@ -210,6 +211,9 @@ LOGGING = {
 }
 
 REST_FRAMEWORK = {
+    'DEFAULT_AUTHENTICATION_CLASSES': [
+        'rest_framework.authentication.TokenAuthentication',
+    ],
     'DEFAULT_RENDERER_CLASSES': [
         'rest_framework.renderers.JSONRenderer',
         'rest_framework.renderers.BrowsableAPIRenderer',

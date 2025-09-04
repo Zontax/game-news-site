@@ -22,12 +22,12 @@
         </div>
 
         <p class="card-text mb-auto">
-            <i class="btn btn-dark ml-1" 
+            {% comment %} <i class="btn btn-dark ml-1" 
                 hx-get="/api/get-reply-comments/{{ comment.id }}" 
                 hx-trigger="click"
                 hx-target="#ansver-to-{{ comment.id }}">
                 Відповісти
-            </i>
+            </i> {% endcomment %}
 
             {% if comment.replies_count > 0 %}
                 <a href="javascript:void(0);" 

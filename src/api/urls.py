@@ -26,11 +26,16 @@ urlpatterns = [
     path('search-posts/', views.SearchPostsAPIView.as_view(), name='search_posts'),
     path('test/', views.TestHtmxAPIView.as_view(), name='htmx_test'),
     path('htmx-modal/', views.ModalWindowAPIView.as_view(), name='htmx_modal'),
-    path('users/check_username/', views.CheckUsernameAPIView.as_view(), 
+    path('users/check_username/', views.CheckUsernameAPIView.as_view(),
          name='check_username'),
     path('users/check_email/', views.CheckEmailAPIView.as_view(), name='check_email'),
     path('get-reply-comments/<int:id>/', views.GetReplyCommentsAPIView.as_view(),
          name='get_reply_comments'),
     path('tabs/<str:text>/', views.HtmxTabsAPIView.as_view(),
          name='htmx_tabs'),
+
+    # Other for Mobile app
+    path('auth/register/', views.UserRegisterAPIView.as_view(), name='register'),
+    path('auth/login/', views.UserLoginAPIView.as_view(), name='login'),
+    path('auth/logout/', views.UserLogoutAPIView.as_view(), name='logout'),
 ]

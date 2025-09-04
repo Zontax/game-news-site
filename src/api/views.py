@@ -14,12 +14,18 @@ from rest_framework.views import APIView
 from mimesis import Person, Text, Datetime
 from mimesis.builtins import UkraineSpecProvider
 from pytils.translit import slugify
-from core.settings.base import MEDIA_ROOT
+from core.settings.base import MEDIA_ROOT, APP_NAME, TOKEN_LIFETIME
 from main.services import create_random_image
 from users.models import User
-from api.serializers import UserListSerializer, PostListSerializer, PostDetailSerializer
+from api.serializers import UserListSerializer, PostListSerializer, PostDetailSerializer, UserRegisterSerializer, UserLoginSerializer
 from posts.models import Post, PostType, PostTag, PostTopic, PostComment
 from posts.services import post_search
+from django.contrib.auth import login, logout
+from rest_framework.authtoken.models import Token
+from rest_framework import status
+from users.services import generate_token
+from users.tasks import send_to_email, clear_user_token
+from django.urls import reverse_lazy
 
 
 logger = logging.getLogger(__name__)
@@ -30,6 +36,64 @@ ua_provider = UkraineSpecProvider()
 tab_text1 = text.text(1)
 tab_text2 = text.text(2)
 tab_text3 = text.text(4)
+
+
+class UserRegisterAPIView(APIView):
+    def post(self, request, *args, **kwargs):
+        serializer = UserRegisterSerializer(data=request.data)
+        if serializer.is_valid():
+            user = serializer.save()
+            token = generate_token()
+            # Note: The confirmation URL should ideally point to frontend app,
+            # which then makes a request to the backend API.
+            # For simplicity, we point to the API directly here.
+            activation_url = request.build_absolute_uri(
+                reverse_lazy('api:register_confirm', kwargs={'token': token}))
+
+            subject = f'Account Activation ({APP_NAME})'
+            message = f'({APP_NAME}) Account activation code: {token}'
+            html_message = f"""
+                    <h2>Account Activation ({APP_NAME})</h2>
+                    <p>Your code: <b>{token}</b></p>
+                    <p>Or follow the link <a href="{activation_url}">{activation_url}</a></p>"""
+            send_to_email.delay(subject, message, html_message, [user.email])
+
+            user.activation_key = token
+            user.save()
+
+            clear_user_token.apply_async((user.pk,), countdown=TOKEN_LIFETIME)
+
+            return Response({"message": "User created successfully. Please check your email to activate your account."}, status=status.HTTP_201_CREATED)
+        return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+
+
+class UserLoginAPIView(APIView):
+    def post(self, request, *args, **kwargs):
+        serializer = UserLoginSerializer(data=request.data)
+        if serializer.is_valid():
+            user = User.objects.filter(
+                email=serializer.validated_data['email']).first()
+            if user and user.check_password(serializer.validated_data['password']):
+                if user.is_active:
+                    token, created = Token.objects.get_or_create(user=user)
+                    login(request, user)
+                    return Response({'token': token.key}, status=status.HTTP_200_OK)
+                else:
+                    return Response({"error": "User account is not active"}, status=status.HTTP_400_BAD_REQUEST)
+            return Response({"error": "Invalid credentials"}, status=status.HTTP_400_BAD_REQUEST)
+        return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+
+
+class UserLogoutAPIView(APIView):
+    permission_classes = [IsAuthenticated]
+
+    def post(self, request, *args, **kwargs):
+        try:
+            request.user.auth_token.delete()
+            logout(request)
+            return Response({"message": "Successfully logged out."}, status=status.HTTP_200_OK)
+        except (AttributeError, Token.DoesNotExist):
+            return Response({"error": "Invalid token."}, status=status.HTTP_400_BAD_REQUEST)
 
 
 class TestHtmxAPIView(APIView):
